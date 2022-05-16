@@ -23,6 +23,9 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { auth, firestore, storage } from "../../Firebase";
 import Toast from "react-native-simple-toast";
+import { globalStyles } from "../assets/styles/GlobalStyles";
+
+const background = require("../assets/images/home.png");
 
 export default function UserProfile({ route, navigation }) {
   const [modalOpen, setModalOpen] = useState("");
