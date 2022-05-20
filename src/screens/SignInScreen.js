@@ -22,8 +22,37 @@ export default function SignInScreen({ navigation }) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const onLogin = async () => {
-    setLoading(true);
+  // form validation
+  const validate = () => {
+    setLoading(!loading);
+    const strongRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/;
+    const reg =
+      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    if (email == "" && password == "") {
+      Toast.show(
+        "Email and Password cannot be empty",
+        Toast.LONG,
+        Toast.CENTER
+      );
+    } else if (email == "") {
+      Toast.show("Email cannot be empty", Toast.LONG, Toast.CENTER);
+      setLoading(false);
+    } else if (password == "") {
+      Toast.show("Password cannot be empty", Toast.LONG, Toast.CENTER);
+      setLoading(false);
+    } else if (!reg.test(email)) {
+      Toast.show("Email is not valid", Toast.LONG, Toast.CENTER);
+      setLoading(false);
+    } else if (!strongRegex.test(password)) {
+      Toast.show("Password is not valid", Toast.LONG, Toast.CENTER);
+      setLoading(false);
+    } else {
+      signIn();
+    }
+  };
+
+  const signIn = async () => {
     if (email !== "" && password !== "") {
       await auth
         .signInWithEmailAndPassword(email, password)
@@ -35,7 +64,9 @@ export default function SignInScreen({ navigation }) {
             Toast.LONG,
             Toast.CENTER
           );
-          if (user) navigation.replace("LandingPage");
+          if (user) {
+            navigation.replace("LandingPage");
+          }
         })
         .catch((error) => {
           console.log(error);
@@ -46,11 +77,12 @@ export default function SignInScreen({ navigation }) {
             Toast.show("No User Found", Toast.LONG, Toast.CENTER);
             setLoading(false);
           } else {
-            Toast.show(
-              "Please check your email id or password",
-              Toast.LONG,
-              Toast.CENTER
-            );
+            console.log(error.code, " this the error you should catch");
+            // Toast.show(
+            //   "Please check your email id or password",
+            //   Toast.LONG,
+            //   Toast.CENTER
+            // );
             setLoading(false);
           }
         });
@@ -99,14 +131,31 @@ export default function SignInScreen({ navigation }) {
           />
         </View>
 
-        <TouchableOpacity onPress={onLogin} activeOpacity={0.5}>
+        <TouchableOpacity
+          onPress={() => {
+            validate();
+          }}
+          activeOpacity={0.5}
+        >
           <LinearGradient
             start={{ x: 1, y: 0 }}
             end={{ x: 1, y: 0 }}
             colors={["#CEB89E", "#9F805C"]}
             style={styles.buttonStyle}
           >
-            <Text style={styles.buttonTextStyle}>Sign In</Text>
+            {!loading ? (
+              <>
+                <Text style={styles.buttonTextStyle}>Sign In</Text>
+              </>
+            ) : (
+              <>
+                <ActivityIndicator
+                  size="large"
+                  color="#0000ff"
+                  style={styles.buttonTextStyle}
+                />
+              </>
+            )}
           </LinearGradient>
         </TouchableOpacity>
 

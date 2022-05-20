@@ -1,7 +1,7 @@
 import react from "react";
 import { View, Text } from 'react-native';
 
-const LandingPage = () => {
+const   = () => {
     return(
         <View>
             <Text></Text>

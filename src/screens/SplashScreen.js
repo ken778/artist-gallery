@@ -1,10 +1,18 @@
 import { ImageBackground, View, Image, Text } from "react-native";
 import React from "react";
 import { globalStyles } from "../assets/styles/GlobalStyles";
+import { auth } from "../../Firebase";
 
 export default function SplashScreen({ navigation }) {
   setTimeout(() => {
-    navigation.replace("Onboarding");
+    auth.onAuthStateChanged((userCredential) => {
+      // const user = userCredential;
+      if (userCredential) {
+        navigation.replace("LandingPage");
+      } else {
+        navigation.replace("Onboarding");
+      }
+    });
   }, 3000);
 
   return (

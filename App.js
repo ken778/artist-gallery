@@ -17,6 +17,9 @@ import SignUpScreen from "./src/screens/SignUpScreen";
 import Sales from "./src/screens/Sales";
 import Products from "./src/screens/Products";
 import UserProfile from "./src/screens/Profile";
+import ArtWorkScreen from "./src/screens/ArtWorkScreen";
+import SocialMediaScreen from "./src/screens/SocialMediaScreen";
+import ArtistProfileScreen from "./src/screens/ArtistProfileScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createMaterialTopTabNavigator();
@@ -69,11 +72,12 @@ export default function App({ navigation, route }) {
   const [User, setUser] = useState(null);
   const [artistName, setArtistName] = useState(null);
   const [artistUid, setArtistUid] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
+  const [description, setDescription] = useState("");
 
   useEffect(() => {
     const unregister = auth.onAuthStateChanged((userExist) => {
       // const artistUid = auth()?.currentUser?.uid;
-
       if (userExist) {
         setArtist(userExist);
         firestore
@@ -86,10 +90,18 @@ export default function App({ navigation, route }) {
             const uName = snapShot.docs.map(
               (document) => document.data().artistName
             );
+            const videoIds = snapShot.docs.map(
+              (document) => document.data().videoUrl
+            );
+            const descriptions = snapShot.docs.map(
+              (document) => document.data().description
+            );
             // console.log(cartItems + "  this the number of item added to cart")
+            setVideoUrl(videoIds);
             setUser(users);
             setArtistName(uName);
             setArtistUid(userExist.uid);
+            setDescription(descriptions);
           });
       } else {
         setUser("");
@@ -144,6 +156,8 @@ export default function App({ navigation, route }) {
                           artistUid: artistUid,
                           artistName: artistName,
                           photoUrl: User,
+                          description: description,
+                          videoUrl: videoUrl,
                         })
                       }
                     >
@@ -181,14 +195,29 @@ export default function App({ navigation, route }) {
               name="Sales"
               component={Sales}
             />
+            <Stack.Screen
+              options={{ headerShown: false }}
+              name="ArtWork"
+              component={ArtWorkScreen}
+            />
+            <Stack.Screen
+              options={{ headerShown: false }}
+              name="SocialMedia"
+              component={SocialMediaScreen}
+            />
+            <Stack.Screen
+              options={{ headerShown: false }}
+              name="ArtistProfile"
+              component={ArtistProfileScreen}
+            />
           </>
         ) : (
           <>
-            {/* <Stack.Screen
+            <Stack.Screen
               options={{ headerShown: false }}
               name="SignIn"
               component={SignInScreen}
-            /> */}
+            />
             <Stack.Screen
               options={{ headerShown: false }}
               name="Splash"
@@ -206,11 +235,6 @@ export default function App({ navigation, route }) {
             />
           </>
         )}
-        <Stack.Screen
-          options={{ headerShown: false }}
-          name="SignIn"
-          component={SignInScreen}
-        />
       </Stack.Navigator>
     </NavigationContainer>
   );

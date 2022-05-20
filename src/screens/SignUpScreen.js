@@ -17,11 +17,49 @@ import { Formik } from "formik";
 import { LinearGradient } from "expo-linear-gradient";
 import { auth, firestore } from "../../Firebase";
 import Toast from "react-native-simple-toast";
+import PasswordStrengthMeterBar from "react-native-password-strength-meter-bar";
 
 export default function SignUpScreen({ navigation }) {
   const [artistName, setArtistName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  // form validation
+  const validate = () => {
+    const pattern = /^[a-zA-Z]{2,40}( [a-zA-Z]{2,40})+$/;
+    const strongRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/;
+    const reg =
+      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    if (email == "" && password == "") {
+      Toast.show(
+        "Email and Password cannot be empty",
+        Toast.LONG,
+        Toast.CENTER
+      );
+    } else if (email == "") {
+      Toast.show("Email cannot be empty", Toast.LONG, Toast.CENTER);
+      setLoading(false);
+    } else if (password == "") {
+      Toast.show("Password cannot be empty", Toast.LONG, Toast.CENTER);
+      setLoading(false);
+    } else if (artistName == "") {
+      Toast.show("Your artist name cannot be empty", Toast.LONG, Toast.CENTER);
+      setLoading(false);
+    } else if (!reg.test(email)) {
+      Toast.show("Email is not valid", Toast.LONG, Toast.CENTER);
+      setLoading(false);
+    } else if (!pattern.test(artistName)) {
+      Toast.show("Name is not valid", Toast.LONG, Toast.CENTER);
+      setLoading(false);
+    } else if (!strongRegex.test(password)) {
+      Toast.show("Password is not valid", Toast.LONG, Toast.CENTER);
+      setLoading(false);
+    } else {
+      onSignup();
+    }
+  };
 
   const onSignup = () => {
     if (artistName !== "" && email !== "" && password !== "") {
@@ -33,11 +71,12 @@ export default function SignUpScreen({ navigation }) {
             .collection("artists")
             .doc(artist.uid)
             .set({
+              timeStamp: new Date().toISOString(),
               artistUid: artist.uid,
               artistName: artistName,
               email: artist.email,
               photoUrl:
-                "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRCTa1o13qHi0hBEUMcOCKQhrrNSr8pSUmAoA&usqp=CAU",
+                "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTqjYWb_kZ7jZ_aCJJdFjLqxS-DBaGsJGxopg&usqp=CAU",
             })
             .then(() => {
               Toast.show(
@@ -73,7 +112,10 @@ export default function SignUpScreen({ navigation }) {
     <>
       <KeyboardAvoidingView
         behavior=""
-        style={{ flex: 1, backgroundColor: "#573E22" }}
+        style={{
+          flex: 1,
+          backgroundColor: "#573E22",
+        }}
       >
         <View style={styles.topBody}>
           <View>
@@ -127,8 +169,19 @@ export default function SignUpScreen({ navigation }) {
                 secureTextEntry={true}
                 textContentType="password"
               />
+              <PasswordStrengthMeterBar
+                password={password}
+                showStrenghtText={false}
+                height={6}
+                radius={4}
+              />
             </View>
-            <TouchableOpacity onPress={onSignup} activeOpacity={0.5}>
+            <TouchableOpacity
+              onPress={() => {
+                validate();
+              }}
+              activeOpacity={0.5}
+            >
               <LinearGradient
                 start={{ x: 1, y: 0 }}
                 end={{ x: 1, y: 0 }}
@@ -174,7 +227,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   SectionStyle: {
-    flexDirection: "row",
+    flexDirection: "column",
     height: 40,
     marginTop: 17,
     marginLeft: 35,

@@ -21,7 +21,7 @@ import {
   Entypo,
 } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import { auth, firestore, storage } from "../../Firebase";
+import { auth, firestore, storageRef } from "../../Firebase";
 import Toast from "react-native-simple-toast";
 import { globalStyles } from "../assets/styles/GlobalStyles";
 
@@ -29,8 +29,8 @@ const background = require("../assets/images/home.png");
 
 export default function UserProfile({ route, navigation }) {
   const [modalOpen, setModalOpen] = useState("");
-  const [userName, setUserName] = useState("");
-  const [description, setDescription] = useState("");
+  const [userName, setUserName] = useState(`${route.params.artistName}`);
+  const [description, setDescription] = useState(`${route.params.description}`);
   const [imageUri, setimageUri] = useState(`${route.params.photoUrl}`);
   const [submit, setSubmit] = useState(false);
   // const [photoUrl, setPhotoUrl] = useState("");
@@ -44,8 +44,6 @@ export default function UserProfile({ route, navigation }) {
       aspect: [4, 3],
       quality: 1,
     });
-
-    console.log(result.uri);
 
     if (!result.cancelled) {
       setSubmit(!submit);
@@ -89,6 +87,7 @@ export default function UserProfile({ route, navigation }) {
         artistName: userName,
         photoUrl: imageUri,
         timeStamp: new Date().toISOString(),
+        description: description,
       })
       .then(() => {
         Toast.show(
@@ -102,9 +101,6 @@ export default function UserProfile({ route, navigation }) {
         alert(error);
       });
   };
-  useEffect(() => {
-    console.log(photoUrl, "   the photootdsfsdfdsfs");
-  }, []);
 
   const signoutUser = async () => {
     try {
@@ -160,17 +156,17 @@ export default function UserProfile({ route, navigation }) {
               <TextInput
                 placeholder="Edit Username"
                 placeholderTextColor="gray"
+                value={`${userName}`}
                 onChangeText={(artistName) => setUserName(artistName)}
                 style={styles.editUserInput}
               />
-
               <TextInput
                 placeholder="description"
                 placeholderTextColor="gray"
+                value={`${description}`}
                 onChangeText={(description) => setDescription(description)}
                 style={styles.editUserInput}
               />
-
               <TouchableOpacity style={styles.updateBtn} onPress={updateUser}>
                 <Text style={styles.modalText}>Update</Text>
               </TouchableOpacity>
@@ -189,7 +185,6 @@ export default function UserProfile({ route, navigation }) {
             </TouchableOpacity>
           </View>
 
-          {/*  */}
           <View style={styles.optionsContainer}>
             <TouchableOpacity
               onPress={() => navigation.navigate("Terms")}
@@ -213,25 +208,22 @@ export default function UserProfile({ route, navigation }) {
                   color: "#0E1822",
                 }}
               />
-              <Text style={{ marginHorizontal: 10, color: "#0E1822" }}>
+              <Text
+                style={{
+                  color: "#0E1822",
+                  alignSelf: "center",
+                  marginHorizontal: 30,
+                }}
+              >
                 Terms & Conditions
               </Text>
-              <Entypo
-                name="chevron-small-right"
-                size={24}
-                style={{
-                  marginVertical: -10,
-                  marginHorizontal: "47%",
-                  color: "#0E1822",
-                }}
-              />
             </TouchableOpacity>
             <View
               style={{
                 backgroundColor: "#E3E3E3",
                 width: "80%",
                 height: 70,
-                flexDirection: "row",
+                flexDirection: "column",
                 alignSelf: "center",
                 alignItems: "center",
                 borderRadius: 20,
@@ -239,11 +231,18 @@ export default function UserProfile({ route, navigation }) {
               }}
             >
               <Text
-                style={{ color: "#0E1822", fontSize: 16, fontWeight: "600" }}
+                style={{
+                  color: "#0E1822",
+                  fontSize: 16,
+                  fontWeight: "600",
+                  marginVertical: 10,
+                }}
               >
                 App Version
               </Text>
-              <Text style={{ color: "gray", fontSize: 12 }}>v1.0.0</Text>
+              <Text style={{ color: "gray", fontSize: 12, marginVertical: -5 }}>
+                v1.0.0
+              </Text>
             </View>
             <TouchableOpacity
               onPress={signoutUser}
@@ -255,7 +254,7 @@ export default function UserProfile({ route, navigation }) {
                 alignSelf: "center",
                 alignItems: "center",
                 borderRadius: 20,
-                marginVertical: 10,
+                // marginVertical: 10,
               }}
             >
               <AntDesign
@@ -270,9 +269,9 @@ export default function UserProfile({ route, navigation }) {
               />
               <Text
                 style={{
-                  marginHorizontal: 70,
+                  marginHorizontal: 80,
                   color: "#0E1822",
-                  textAlign: "center",
+                  alignSelf: "center",
                 }}
               >
                 Logout

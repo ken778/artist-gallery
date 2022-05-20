@@ -75,6 +75,7 @@ export default function Products({ navigation }) {
         });
     } else {
       setimageUri(result.uri);
+      setSubmit(false);
     }
   };
 
