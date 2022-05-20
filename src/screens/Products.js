@@ -69,7 +69,6 @@ export default function Products({ navigation }) {
             imageUrl,
             "this is setting the image too storage before 3"
           );
-
           blob.close();
           setSubmit(false);
         });

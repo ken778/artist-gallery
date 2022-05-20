@@ -108,7 +108,7 @@ export default function UserProfile({ route, navigation }) {
         .signOut()
         .then(() => {
           Toast.show("You have signed out!", Toast.LONG, Toast.CENTER);
-          navigation.replace("SignIn");
+          navigation.replace("Splash");
         })
         .catch((error) => alert(error));
     } catch (e) {

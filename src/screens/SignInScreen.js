@@ -76,6 +76,8 @@ export default function SignInScreen({ navigation }) {
           } else if (error.code === "auth/user-not-found") {
             Toast.show("No User Found", Toast.LONG, Toast.CENTER);
             setLoading(false);
+          } else if (error.code === "auth/wrong-password") {
+            Toast.show("Your Password is Incorrect", Toast.LONG, Toast.CENTER);
           } else {
             console.log(error.code, " this the error you should catch");
             // Toast.show(

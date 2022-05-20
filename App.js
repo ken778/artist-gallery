@@ -218,11 +218,11 @@ export default function App({ navigation, route }) {
               name="SignIn"
               component={SignInScreen}
             />
-            <Stack.Screen
+            {/* <Stack.Screen
               options={{ headerShown: false }}
               name="Splash"
               component={SplashScreen}
-            />
+            /> */}
             <Stack.Screen
               options={{ headerShown: false }}
               name="Onboarding"
@@ -235,6 +235,11 @@ export default function App({ navigation, route }) {
             />
           </>
         )}
+        <Stack.Screen
+          options={{ headerShown: false }}
+          name="Splash"
+          component={SplashScreen}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

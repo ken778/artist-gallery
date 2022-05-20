@@ -169,6 +169,8 @@ export default function SignUpScreen({ navigation }) {
                 secureTextEntry={true}
                 textContentType="password"
               />
+            </View>
+            <View style={{ width: "80%", alignSelf: "center" }}>
               <PasswordStrengthMeterBar
                 password={password}
                 showStrenghtText={false}
