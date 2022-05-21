@@ -16,8 +16,13 @@ import {
 } from "react-native";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import { auth, firestore, storage } from "../../Firebase";
+import { auth, firestore, storageRef } from "../../Firebase";
 import Toast from "react-native-simple-toast";
+import ProductModal from "../assets/components/ProductModal";
+import DatePicker from "react-native-date-picker";
+import moment from "moment";
+
+const placeholder = require("../assets/images/index.png");
 
 export default function Products({ navigation }) {
   //
@@ -25,16 +30,21 @@ export default function Products({ navigation }) {
   const [submit, setSubmit] = useState(false);
 
   const [modalVisible, setModalVisible] = useState(false);
-  const [artType, setArtType] = useState("");
-  const [artName, setArtName] = useState("");
   const [artPrice, setArtPrice] = useState(0);
   const [description, setDescription] = useState("");
-  const [artSize, setArtSize] = useState(0);
+
+  const [imageUid, setImageUid] = useState("");
 
   const [modalVisible1, setModalVisible1] = useState(false);
   const [address, setAddress] = useState("");
   const [date, setDate] = useState("");
   const [title, setExhibition] = useState("");
+  //date
+  // const [date, setDate] = useState(
+  //   moment(new Date().toISOString()).format("YYYY-MM-DD")
+  // );
+  // const [open, setOpen] = useState(false);
+  //
 
   const openImageLibrary = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -65,16 +75,67 @@ export default function Products({ navigation }) {
         .getDownloadURL()
         .then((imageUrl) => {
           setimageUri(imageUrl);
-          console.log(
-            imageUrl,
-            "this is setting the image too storage before 3"
-          );
           blob.close();
           setSubmit(false);
         });
     } else {
       setimageUri(result.uri);
       setSubmit(false);
+    }
+  };
+
+  const validateExhibition = () => {
+    const pattern = /^[a-zA-Z]{2,40} ( [a-zA-Z]{2,40})+$/;
+    if (!pattern.test(address)) {
+      Toast.show(
+        "Email and Password cannot be empty",
+        Toast.LONG,
+        Toast.CENTER
+      );
+    } else if (!pattern.test(imageUri)) {
+      Toast.show(
+        "Email and Password cannot be empty",
+        Toast.LONG,
+        Toast.CENTER
+      );
+    } else if (!pattern.test(title)) {
+      Toast.show(
+        "Email and Password cannot be empty",
+        Toast.LONG,
+        Toast.CENTER
+      );
+    } else if (!pattern.test(description)) {
+      Toast.show(
+        "Exhibition description cannot be empty or less than two words",
+        Toast.LONG,
+        Toast.CENTER
+      );
+    } else if (!pattern.test(date)) {
+      Toast.show("Date cannot be empty", Toast.LONG, Toast.CENTER);
+    } else if (!pattern.test(artPrice)) {
+      Toast.show("art empty", Toast.LONG, Toast.CENTER);
+    } else if (title == "") {
+      Toast.show("Exhibition title cannot be empty", Toast.LONG, Toast.CENTER);
+    } else if (date == "") {
+      Toast.show("Exhibition date cannot be empty", Toast.LONG, Toast.CENTER);
+    } else if (address == "") {
+      Toast.show("Address cannot be empty", Toast.LONG, Toast.CENTER);
+    } else if (description == "") {
+      Toast.show(
+        "Exhibition Description cannot be empty",
+        Toast.LONG,
+        Toast.CENTER
+      );
+    } else if (title == "") {
+      Toast.show("Exhibition title cannot be empty", Toast.LONG, Toast.CENTER);
+    } else if (imageUri == "") {
+      Toast.show(
+        "Please Upload the exhibition Image",
+        Toast.LONG,
+        Toast.CENTER
+      );
+    } else {
+      exhitionDetails();
     }
   };
 
@@ -97,48 +158,6 @@ export default function Products({ navigation }) {
           exhibitionUid: docSnap.id,
         });
       });
-  };
-
-  // add to market collection and update artist collection
-  const artistArtDetails = async () => {
-    const artistUid = auth?.currentUser?.uid;
-    setModalVisible(!modalVisible);
-
-    await firestore
-      .collection("Market")
-      .add({
-        ArtistUid: artistUid,
-        artUrl: imageUri,
-        artType: artType,
-        description: description,
-        artName: artName,
-        artSize: artSize,
-        price: parseFloat(artPrice),
-      })
-      .then((docSnap) => {
-        docSnap.update({
-          ImageUid: docSnap.id,
-        });
-      })
-      .then(() => {
-        update(imageUri, artName, artType);
-      });
-    alert("you have successfully update your Market");
-  };
-
-  const update = async (imageUri, artName, artType) => {
-    const artistUid = auth?.currentUser?.uid;
-
-    try {
-      await firestore.collection("artists").doc(artistUid).update({
-        artUrl: imageUri,
-        artName: artName,
-        artType: artType,
-        artSize: artSize,
-      });
-    } catch (error) {
-      alert(error);
-    }
   };
 
   //
@@ -181,184 +200,12 @@ export default function Products({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => {
-            setModalVisible(!modalVisible);
-          }}
-        >
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <View style={{ left: 135, bottom: 25 }}>
-                <AntDesign
-                  name="closecircleo"
-                  size={24}
-                  color="#ceb89e"
-                  onPress={() => setModalVisible(!modalVisible)}
-                />
-              </View>
-
-              <Text
-                style={{
-                  textAlign: "center",
-                  color: "#ceb89e",
-                  fontSize: 25,
-                  bottom: 55,
-                }}
-              >
-                Upload Your Art
-              </Text>
-
-              <View style={{ bottom: 45 }}>
-                <TouchableOpacity>
-                  <Image source={{ uri: imageUri }} style={styles.image} />
-                  {!submit ? (
-                    <MaterialIcons
-                      onPress={() => openImageLibrary()}
-                      name="camera"
-                      size={24}
-                      color="#ceb89e"
-                      style={{ marginLeft: 80, marginTop: -25 }}
-                    />
-                  ) : (
-                    <ActivityIndicator
-                      style={{ alignSelf: "center", position: "absolute" }}
-                      color="black"
-                      size="small"
-                    />
-                  )}
-                </TouchableOpacity>
-              </View>
-
-              <ScrollView style={{ bottom: 30 }}>
-                <View style={styles.TextField}>
-                  <View style={{ flexDirection: "row", marginHorizontal: 3 }}>
-                    <Text
-                      style={{
-                        flexDirection: "row",
-                        color: "#ceb89e",
-                        marginHorizontal: 10,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Art Type:
-                    </Text>
-                  </View>
-
-                  <TextInput
-                    style={styles.input}
-                    onChangeText={(artType) => setArtType(artType)}
-                    //value={name}
-                    placeholder="Enter Art Type"
-                  />
-                </View>
-
-                <View style={styles.TextField}>
-                  <View
-                    style={{
-                      flex: 1,
-                      flexDirection: "row",
-                      marginHorizontal: 3,
-                    }}
-                  >
-                    <Text
-                      style={{
-                        flex: 1,
-                        flexDirection: "row",
-                        color: "#ceb89e",
-                        marginHorizontal: 10,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Art Name:
-                    </Text>
-                  </View>
-
-                  <TextInput
-                    style={styles.input}
-                    onChangeText={(artName) => setArtName(artName)}
-                    //value={name}
-                    placeholder="Enter Art Name"
-                  />
-                </View>
-
-                <View style={styles.TextField}>
-                  <View style={{ flexDirection: "row", marginHorizontal: 3 }}>
-                    <Text
-                      style={{
-                        flexDirection: "row",
-                        color: "#ceb89e",
-                        marginHorizontal: 10,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Price:
-                    </Text>
-                  </View>
-
-                  <TextInput
-                    style={styles.input}
-                    onChangeText={(artPrice) => setArtPrice(artPrice)}
-                    //value={price}
-                    placeholder="Enter Art Price"
-                  />
-                </View>
-
-                <View style={styles.TextField}>
-                  <View style={{ flexDirection: "row", marginHorizontal: 3 }}>
-                    <Text
-                      style={{
-                        flexDirection: "row",
-                        color: "#ceb89e",
-                        marginHorizontal: 10,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Description:
-                    </Text>
-                  </View>
-
-                  <TextInput
-                    style={styles.input}
-                    onChangeText={(description) => setDescription(description)}
-                    //value={price}
-                    placeholder="Enter Art Description"
-                  />
-                </View>
-                <View style={styles.TextField}>
-                  <View style={{ flexDirection: "row", marginHorizontal: 3 }}>
-                    <Text
-                      style={{
-                        flexDirection: "row",
-                        color: "#ceb89e",
-                        marginHorizontal: 10,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Art Size:{" "}
-                    </Text>
-                  </View>
-
-                  <TextInput
-                    style={styles.input}
-                    onChangeText={(artSize) => setArtSize(artSize)}
-                    //value={price}
-                    placeholder="Enter Art Size"
-                  />
-                </View>
-              </ScrollView>
-
-              <TouchableOpacity
-                style={styles.button}
-                onPress={artistArtDetails}
-              >
-                <Text style={styles.textStyle}>Add</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
+        {modalVisible && (
+          <ProductModal
+            isVisible={modalVisible}
+            onClose={() => setModalVisible(false)}
+          />
+        )}
 
         <FlatList
           horizontal
@@ -373,7 +220,6 @@ export default function Products({ navigation }) {
             );
           }}
         />
-
         {/* Exhibition Modal */}
         <Modal
           animationType="slide"
@@ -393,7 +239,6 @@ export default function Products({ navigation }) {
                   onPress={() => setModalVisible1(!modalVisible1)}
                 />
               </View>
-
               <Text
                 style={{
                   textAlign: "center",
@@ -402,12 +247,19 @@ export default function Products({ navigation }) {
                   bottom: 55,
                 }}
               >
-                Upload Exhibition Details
+                Add Exhibition
               </Text>
-
               <View style={{ bottom: 45 }}>
                 <TouchableOpacity>
-                  <Image source={{ uri: imageUri }} style={styles.image} />
+                  {imageUri == "" ? (
+                    <>
+                      <Image source={placeholder} style={styles.image} />
+                    </>
+                  ) : (
+                    <>
+                      <Image source={{ uri: imageUri }} style={styles.image} />
+                    </>
+                  )}
                   {!submit ? (
                     <MaterialIcons
                       onPress={() => openImageLibrary()}
@@ -418,15 +270,18 @@ export default function Products({ navigation }) {
                     />
                   ) : (
                     <ActivityIndicator
-                      style={{ alignSelf: "center", position: "absolute" }}
+                      style={{
+                        alignSelf: "center",
+                        position: "absolute",
+                        marginVertical: 50,
+                      }}
                       color="black"
                       size="small"
                     />
                   )}
                 </TouchableOpacity>
               </View>
-
-              <View style={{ bottom: 30 }}>
+              <View style={{ bottom: 35 }}>
                 <View style={styles.TextField}>
                   <View style={{ flexDirection: "row", marginHorizontal: 3 }}>
                     <Text
@@ -440,7 +295,6 @@ export default function Products({ navigation }) {
                       Exhibition Title:
                     </Text>
                   </View>
-
                   <TextInput
                     style={styles.input}
                     onChangeText={(title) => setExhibition(title)}
@@ -491,7 +345,6 @@ export default function Products({ navigation }) {
                       Address:
                     </Text>
                   </View>
-
                   <TextInput
                     style={styles.input}
                     onChangeText={(address) => setAddress(address)}
@@ -499,7 +352,6 @@ export default function Products({ navigation }) {
                     placeholder="Enter Address"
                   />
                 </View>
-
                 <View style={styles.TextField}>
                   <View style={{ flexDirection: "row", marginHorizontal: 3 }}>
                     <Text
@@ -513,7 +365,6 @@ export default function Products({ navigation }) {
                       Description:
                     </Text>
                   </View>
-
                   <TextInput
                     style={styles.input}
                     onChangeText={(description) => setDescription(description)}
@@ -522,7 +373,6 @@ export default function Products({ navigation }) {
                   />
                 </View>
               </View>
-
               <TouchableOpacity style={styles.button} onPress={exhitionDetails}>
                 <Text style={styles.textStyle}>Add</Text>
               </TouchableOpacity>
@@ -604,7 +454,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 40,
     justifyContent: "center",
-    marginVertical: -20,
+    marginVertical: -25,
     //borderWidth: 1
   },
   buttonOpen: {
