@@ -19,7 +19,7 @@ import * as ImagePicker from "expo-image-picker";
 import { auth, firestore, storageRef } from "../../Firebase";
 import Toast from "react-native-simple-toast";
 import ProductModal from "../assets/components/ProductModal";
-import DatePicker from "react-native-date-picker";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import moment from "moment";
 
 const placeholder = require("../assets/images/index.png");
@@ -28,6 +28,9 @@ export default function Products({ navigation }) {
   //
   const [imageUri, setimageUri] = useState("");
   const [submit, setSubmit] = useState(false);
+  //
+  const [artist, setArtist] = useState([]);
+  const [date, setDate] = useState(new Date());
 
   const [modalVisible, setModalVisible] = useState(false);
   const [artPrice, setArtPrice] = useState(0);
@@ -37,14 +40,21 @@ export default function Products({ navigation }) {
 
   const [modalVisible1, setModalVisible1] = useState(false);
   const [address, setAddress] = useState("");
-  const [date, setDate] = useState("");
+  // const [date, setDate] = useState("");
   const [title, setExhibition] = useState("");
+  const [isVisible, setVisible] = useState(false);
   //date
   // const [date, setDate] = useState(
   //   moment(new Date().toISOString()).format("YYYY-MM-DD")
   // );
   // const [open, setOpen] = useState(false);
   //
+
+  const onChange = (event, selectedDate) => {
+    const currentDate = selectedDate || date;
+    setDate(currentDate);
+    setVisible(false);
+  };
 
   const openImageLibrary = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -86,54 +96,32 @@ export default function Products({ navigation }) {
 
   const validateExhibition = () => {
     const pattern = /^[a-zA-Z]{2,40} ( [a-zA-Z]{2,40})+$/;
-    if (!pattern.test(address)) {
+    if (imageUri == "") {
       Toast.show(
-        "Email and Password cannot be empty",
+        "Please Upload your Exhibition Image",
         Toast.LONG,
         Toast.CENTER
       );
-    } else if (!pattern.test(imageUri)) {
-      Toast.show(
-        "Email and Password cannot be empty",
-        Toast.LONG,
-        Toast.CENTER
-      );
-    } else if (!pattern.test(title)) {
-      Toast.show(
-        "Email and Password cannot be empty",
-        Toast.LONG,
-        Toast.CENTER
-      );
-    } else if (!pattern.test(description)) {
-      Toast.show(
-        "Exhibition description cannot be empty or less than two words",
-        Toast.LONG,
-        Toast.CENTER
-      );
-    } else if (!pattern.test(date)) {
-      Toast.show("Date cannot be empty", Toast.LONG, Toast.CENTER);
-    } else if (!pattern.test(artPrice)) {
-      Toast.show("art empty", Toast.LONG, Toast.CENTER);
-    } else if (title == "") {
-      Toast.show("Exhibition title cannot be empty", Toast.LONG, Toast.CENTER);
-    } else if (date == "") {
-      Toast.show("Exhibition date cannot be empty", Toast.LONG, Toast.CENTER);
-    } else if (address == "") {
-      Toast.show("Address cannot be empty", Toast.LONG, Toast.CENTER);
     } else if (description == "") {
       Toast.show(
-        "Exhibition Description cannot be empty",
+        "Description should be at least 150 characters/words",
         Toast.LONG,
         Toast.CENTER
       );
     } else if (title == "") {
-      Toast.show("Exhibition title cannot be empty", Toast.LONG, Toast.CENTER);
-    } else if (imageUri == "") {
       Toast.show(
-        "Please Upload the exhibition Image",
+        "Title should not be empty or less than two characters",
         Toast.LONG,
         Toast.CENTER
       );
+    } else if (date == "") {
+      Toast.show(
+        "Please Choose the date of the exhibiton",
+        Toast.LONG,
+        Toast.CENTER
+      );
+    } else if (address == "") {
+      Toast.show("Address cannot be empty", Toast.LONG, Toast.CENTER);
     } else {
       exhitionDetails();
     }
@@ -152,16 +140,20 @@ export default function Products({ navigation }) {
         description: description,
         exhibitionTitle: title,
         date: date,
+        timeStamp: new Date().toISOString(),
       })
       .then((docSnap) => {
         docSnap.update({
           exhibitionUid: docSnap.id,
+          isEnabled: false,
         });
+        Toast.show(
+          "Your Exhibition will be Processed within three days",
+          Toast.LONG,
+          Toast.CENTER
+        );
       });
   };
-
-  //
-  const [artist, setArtist] = useState([]);
 
   const getArtUrl = () => {
     const artistUid = auth?.currentUser?.uid;
@@ -323,13 +315,29 @@ export default function Products({ navigation }) {
                       Date:
                     </Text>
                   </View>
+                  {isVisible && (
+                    <DateTimePicker
+                      //selected={date}
+                      display="default"
+                      is24Hour={true}
+                      value={date}
+                      onChange={onChange}
+                      onTouchCancel={() => setVisible(false)}
+                      neutralButtonLabel="clear"
+                    />
+                  )}
+                  <TouchableOpacity onPress={() => setVisible(!isVisible)}>
+                    <Text style={{ marginHorizontal: 10 }}>
+                      {moment(date).format("YYYY/MM/DD")}
+                    </Text>
+                  </TouchableOpacity>
 
-                  <TextInput
+                  {/* <TextInput
                     style={styles.input}
                     onChangeText={(date) => setDate(date)}
                     //value={name}
                     placeholder="Enter Exhibition Date"
-                  />
+                  /> */}
                 </View>
 
                 <View style={styles.TextField}>
@@ -373,7 +381,10 @@ export default function Products({ navigation }) {
                   />
                 </View>
               </View>
-              <TouchableOpacity style={styles.button} onPress={exhitionDetails}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={validateExhibition}
+              >
                 <Text style={styles.textStyle}>Add</Text>
               </TouchableOpacity>
             </View>
