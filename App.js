@@ -75,6 +75,43 @@ export default function App({ navigation, route }) {
   const [videoUrl, setVideoUrl] = useState("");
   const [description, setDescription] = useState("");
 
+  // toast message
+  const toastConfig = {
+    success: (props) => (
+      <BaseToast
+        {...props}
+        style={{ borderLeftColor: "green" }}
+        contentContainerStyle={{ paddingHorizontal: 15 }}
+        text1Style={{
+          fontSize: 17,
+          fontWeight: "400",
+        }}
+        text2Style={{
+          fontSize: 13,
+          color: "green",
+        }}
+      />
+    ),
+    error: (props) => (
+      <ErrorToast
+        {...props}
+        text1Style={{
+          fontSize: 17,
+        }}
+        text2Style={{
+          fontSize: 13,
+          color: "red",
+        }}
+      />
+    ),
+    tomatoToast: ({ text1, props }) => (
+      <View style={{ height: 60, width: "100%", backgroundColor: "tomato" }}>
+        <Text>{text1}</Text>
+        <Text>{props.uuid}</Text>
+      </View>
+    ),
+  };
+
   useEffect(() => {
     const unregister = auth.onAuthStateChanged((userExist) => {
       // const artistUid = auth()?.currentUser?.uid;
@@ -114,9 +151,9 @@ export default function App({ navigation, route }) {
   }, []);
 
   return (
-    <NavigationContainer>
+    <NavigationContainer fallback={<Text>Loading...</Text>}>
       <Stack.Navigator
-        initialRouteName="Splash"
+        initialRouteName="LandingPage"
         screenOptions={{
           headerTitleAlign: "center",
           headerTitleStyle: {
