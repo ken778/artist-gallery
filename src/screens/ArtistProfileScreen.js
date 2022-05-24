@@ -10,7 +10,7 @@ import {
   ScrollView,
   SafeAreaView,
 } from "react-native";
-import Toast from "react-native-simple-toast";
+// import Toast from "react-native-simple-toast";
 //
 import { auth, firestore } from "../../Firebase";
 //
@@ -97,7 +97,7 @@ export default function ArtistProfileScreen({ route, navigation }) {
         onFollowing(artistUid);
       })
       .catch((error) => {
-        Toast.show(`${error}`, Toast.LONG, Toast.CENTER);
+        // Toast.show(`${error}`, Toast.LONG, Toast.CENTER);
       });
   };
 
@@ -119,14 +119,14 @@ export default function ArtistProfileScreen({ route, navigation }) {
           artistName: artistName,
         })
         .then(() => {
-          Toast.show(
-            `You're now Following ${artistName}`,
-            Toast.LONG,
-            Toast.CENTER
-          );
+          // Toast.show(
+          //   `You're now Following ${artistName}`,
+          //   Toast.LONG,
+          //   Toast.CENTER
+          // );
         });
     } catch (error) {
-      Toast.show(`${error}`, Toast.LONG, Toast.CENTER);
+      // Toast.show(`${error}`, Toast.LONG, Toast.CENTER);
     }
   };
 
@@ -141,13 +141,13 @@ export default function ArtistProfileScreen({ route, navigation }) {
         .collection("userFollowing")
         .doc(uuid)
         .delete();
-      Toast.show(
-        `You're no longer following ${artistName}`,
-        Toast.LONG,
-        Toast.CENTER
-      );
+      // Toast.show(
+      //   `You're no longer following ${artistName}`,
+      //   Toast.LONG,
+      //   Toast.CENTER
+      // );
     } catch (error) {
-      Toast.show(`${error}`, Toast.LONG, Toast.CENTER);
+      // Toast.show(`${error}`, Toast.LONG, Toast.CENTER);
     }
   };
 

@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View, TouchableOpacity, Image } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Image,
+  Dimensions,
+} from "react-native";
 //navigation
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
@@ -20,6 +27,7 @@ import UserProfile from "./src/screens/Profile";
 import ArtWorkScreen from "./src/screens/ArtWorkScreen";
 import SocialMediaScreen from "./src/screens/SocialMediaScreen";
 import ArtistProfileScreen from "./src/screens/ArtistProfileScreen";
+import { TabNavigator2 } from "./src/screens/HomeScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createMaterialTopTabNavigator();
@@ -76,41 +84,41 @@ export default function App({ navigation, route }) {
   const [description, setDescription] = useState("");
 
   // toast message
-  const toastConfig = {
-    success: (props) => (
-      <BaseToast
-        {...props}
-        style={{ borderLeftColor: "green" }}
-        contentContainerStyle={{ paddingHorizontal: 15 }}
-        text1Style={{
-          fontSize: 17,
-          fontWeight: "400",
-        }}
-        text2Style={{
-          fontSize: 13,
-          color: "green",
-        }}
-      />
-    ),
-    error: (props) => (
-      <ErrorToast
-        {...props}
-        text1Style={{
-          fontSize: 17,
-        }}
-        text2Style={{
-          fontSize: 13,
-          color: "red",
-        }}
-      />
-    ),
-    tomatoToast: ({ text1, props }) => (
-      <View style={{ height: 60, width: "100%", backgroundColor: "tomato" }}>
-        <Text>{text1}</Text>
-        <Text>{props.uuid}</Text>
-      </View>
-    ),
-  };
+  // const toastConfig = {
+  //   success: (props) => (
+  //     <BaseToast
+  //       {...props}
+  //       style={{ borderLeftColor: "green" }}
+  //       contentContainerStyle={{ paddingHorizontal: 15 }}
+  //       text1Style={{
+  //         fontSize: 17,
+  //         fontWeight: "400",
+  //       }}
+  //       text2Style={{
+  //         fontSize: 13,
+  //         color: "green",
+  //       }}
+  //     />
+  //   ),
+  //   error: (props) => (
+  //     <ErrorToast
+  //       {...props}
+  //       text1Style={{
+  //         fontSize: 17,
+  //       }}
+  //       text2Style={{
+  //         fontSize: 13,
+  //         color: "red",
+  //       }}
+  //     />
+  //   ),
+  //   tomatoToast: ({ text1, props }) => (
+  //     <View style={{ height: 60, width: "100%", backgroundColor: "tomato" }}>
+  //       <Text>{text1}</Text>
+  //       <Text>{props.uuid}</Text>
+  //     </View>
+  //   ),
+  // };
 
   useEffect(() => {
     const unregister = auth.onAuthStateChanged((userExist) => {
@@ -151,9 +159,9 @@ export default function App({ navigation, route }) {
   }, []);
 
   return (
-    <NavigationContainer fallback={<Text>Loading...</Text>}>
+    <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="LandingPage"
+        initialRouteName="Splash"
         screenOptions={{
           headerTitleAlign: "center",
           headerTitleStyle: {
@@ -179,6 +187,10 @@ export default function App({ navigation, route }) {
                 },
 
                 title: "Gallery 360 Africa",
+                headerLeft: () => {
+                  <View style={{ width: "80%", height: Dimensions }}></View>;
+                },
+
                 headerRight: () => (
                   <View
                     style={{
@@ -246,6 +258,55 @@ export default function App({ navigation, route }) {
               options={{ headerShown: false }}
               name="ArtistProfile"
               component={ArtistProfileScreen}
+            />
+            <Stack.Screen
+              name="Home"
+              options={({ navigation }) => ({
+                headerBackVisible: false,
+                headerShadowVisible: false,
+                headerTitleAlign: "left",
+                headerTitleStyle: {
+                  color: "#000",
+                  fontWeight: "bold",
+                },
+                headerStyle: {
+                  backgroundColor: "#fff",
+                },
+
+                //title: "Gallery 360 Africa 2 nested",
+                headerRight: () => (
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      width: 45,
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <TouchableOpacity
+                      onPress={() =>
+                        navigation.navigate("Profile", {
+                          artistUid: artistUid,
+                          artistName: artistName,
+                          photoUrl: User,
+                          description: description,
+                          videoUrl: videoUrl,
+                        })
+                      }
+                    >
+                      <Image
+                        source={{ uri: `${User}` }}
+                        style={{
+                          width: 30,
+                          height: 30,
+                          borderRadius: 30,
+                          backgroundColor: "lightgrey",
+                        }}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                ),
+              })}
+              component={TabNavigator2}
             />
           </>
         ) : (

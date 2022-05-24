@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { auth, firestore } from "../../Firebase";
-import Toast from "react-native-simple-toast";
+// import Toast from "react-native-simple-toast";
 
 export default function SignInScreen({ navigation }) {
   const [email, setEmail] = useState("");
@@ -30,22 +30,22 @@ export default function SignInScreen({ navigation }) {
     const reg =
       /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     if (email == "" && password == "") {
-      Toast.show(
-        "Email and Password cannot be empty",
-        Toast.LONG,
-        Toast.CENTER
-      );
+      // Toast.show(
+      //   "Email and Password cannot be empty",
+      //   Toast.LONG,
+      //   Toast.CENTER
+      // );
     } else if (email == "") {
-      Toast.show("Email cannot be empty", Toast.LONG, Toast.CENTER);
+      // Toast.show("Email cannot be empty", Toast.LONG, Toast.CENTER);
       setLoading(false);
     } else if (password == "") {
-      Toast.show("Password cannot be empty", Toast.LONG, Toast.CENTER);
+      // Toast.show("Password cannot be empty", Toast.LONG, Toast.CENTER);
       setLoading(false);
     } else if (!reg.test(email)) {
-      Toast.show("Email is not valid", Toast.LONG, Toast.CENTER);
+      // Toast.show("Email is not valid", Toast.LONG, Toast.CENTER);
       setLoading(false);
     } else if (!strongRegex.test(password)) {
-      Toast.show("Password is not valid", Toast.LONG, Toast.CENTER);
+      // Toast.show("Password is not valid", Toast.LONG, Toast.CENTER);
       setLoading(false);
     } else {
       signIn();
@@ -59,11 +59,11 @@ export default function SignInScreen({ navigation }) {
         .then((user) => {
           <ActivityIndicator size="large" color="#0000ff" />;
           console.log(user);
-          Toast.show(
-            "You have successfully loged in ",
-            Toast.LONG,
-            Toast.CENTER
-          );
+          // Toast.show(
+          //   "You have successfully loged in ",
+          //   Toast.LONG,
+          //   Toast.CENTER
+          // );
           if (user) {
             navigation.replace("LandingPage");
           }
@@ -71,13 +71,13 @@ export default function SignInScreen({ navigation }) {
         .catch((error) => {
           console.log(error);
           if (error.code === "auth/invalid-email") {
-            Toast.show("Email is not valid", Toast.LONG, Toast.CENTER);
+            // Toast.show("Email is not valid", Toast.LONG, Toast.CENTER);
             setLoading(false);
           } else if (error.code === "auth/user-not-found") {
-            Toast.show("No User Found", Toast.LONG, Toast.CENTER);
+            // Toast.show("No User Found", Toast.LONG, Toast.CENTER);
             setLoading(false);
           } else if (error.code === "auth/wrong-password") {
-            Toast.show("Your Password is Incorrect", Toast.LONG, Toast.CENTER);
+            // Toast.show("Your Password is Incorrect", Toast.LONG, Toast.CENTER);
           } else {
             console.log(error.code, " this the error you should catch");
             // Toast.show(

@@ -17,7 +17,7 @@ import {
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { auth, firestore, storageRef } from "../../Firebase";
-import Toast from "react-native-simple-toast";
+// import Toast from "react-native-simple-toast";
 import ProductModal from "../assets/components/ProductModal";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import moment from "moment";
@@ -97,31 +97,31 @@ export default function Products({ navigation }) {
   const validateExhibition = () => {
     const pattern = /^[a-zA-Z]{2,40} ( [a-zA-Z]{2,40})+$/;
     if (imageUri == "") {
-      Toast.show(
-        "Please Upload your Exhibition Image",
-        Toast.LONG,
-        Toast.CENTER
-      );
+      // Toast.show(
+      //   "Please Upload your Exhibition Image",
+      //   Toast.LONG,
+      //   Toast.CENTER
+      // );
     } else if (description == "") {
-      Toast.show(
-        "Description should be at least 150 characters/words",
-        Toast.LONG,
-        Toast.CENTER
-      );
+      // Toast.show(
+      //   "Description should be at least 150 characters/words",
+      //   Toast.LONG,
+      //   Toast.CENTER
+      // );
     } else if (title == "") {
-      Toast.show(
-        "Title should not be empty or less than two characters",
-        Toast.LONG,
-        Toast.CENTER
-      );
+      // Toast.show(
+      //   "Title should not be empty or less than two characters",
+      //   Toast.LONG,
+      //   Toast.CENTER
+      // );
     } else if (date == "") {
-      Toast.show(
-        "Please Choose the date of the exhibiton",
-        Toast.LONG,
-        Toast.CENTER
-      );
+      // Toast.show(
+      //   "Please Choose the date of the exhibiton",
+      //   Toast.LONG,
+      //   Toast.CENTER
+      // );
     } else if (address == "") {
-      Toast.show("Address cannot be empty", Toast.LONG, Toast.CENTER);
+      // Toast.show("Address cannot be empty", Toast.LONG, Toast.CENTER);
     } else {
       exhitionDetails();
     }
@@ -147,11 +147,11 @@ export default function Products({ navigation }) {
           exhibitionUid: docSnap.id,
           isEnabled: false,
         });
-        Toast.show(
-          "Your Exhibition will be Processed within three days",
-          Toast.LONG,
-          Toast.CENTER
-        );
+        // Toast.show(
+        //   "Your Exhibition will be Processed within three days",
+        //   Toast.LONG,
+        //   Toast.CENTER
+        // );
       });
   };
 

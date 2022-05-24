@@ -22,7 +22,7 @@ import {
 } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { auth, firestore, storageRef } from "../../Firebase";
-import Toast from "react-native-simple-toast";
+// import Toast from "react-native-simple-toast";
 import { globalStyles } from "../assets/styles/GlobalStyles";
 
 const background = require("../assets/images/home.png");
@@ -90,11 +90,11 @@ export default function UserProfile({ route, navigation }) {
         description: description,
       })
       .then(() => {
-        Toast.show(
-          "you have successfully update your profile",
-          Toast.LONG,
-          Toast.CENTER
-        );
+        // Toast.show(
+        //   "you have successfully update your profile",
+        //   Toast.LONG,
+        //   Toast.CENTER
+        // );
         setModalOpen(false);
       })
       .catch((error) => {
@@ -107,7 +107,7 @@ export default function UserProfile({ route, navigation }) {
       await auth
         .signOut()
         .then(() => {
-          Toast.show("You have signed out!", Toast.LONG, Toast.CENTER);
+          // Toast.show("You have signed out!", Toast.LONG, Toast.CENTER);
           navigation.replace("Splash");
         })
         .catch((error) => alert(error));

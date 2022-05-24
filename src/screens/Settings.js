@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import React from "react";
 import { auth, firestore } from "../../Firebase";
-import Toast from "react-native-simple-toast";
+// import Toast from "react-native-simple-toast";
 
 export default function Settings({ navigation }) {
   const signoutUser = async () => {
@@ -16,7 +16,7 @@ export default function Settings({ navigation }) {
       await auth
         .signOut()
         .then(() => {
-          Toast.show("You have signed out!", Toast.LONG, Toast.CENTER);
+          // Toast.show("You have signed out!", Toast.LONG, Toast.CENTER);
           navigation.replace("SignIn");
         })
         .catch((error) => alert(error));

@@ -16,7 +16,7 @@ import {
 import { Formik } from "formik";
 import { LinearGradient } from "expo-linear-gradient";
 import { auth, firestore } from "../../Firebase";
-import Toast from "react-native-simple-toast";
+// import Toast from "react-native-simple-toast";
 import PasswordStrengthMeterBar from "react-native-password-strength-meter-bar";
 
 export default function SignUpScreen({ navigation }) {
@@ -33,28 +33,28 @@ export default function SignUpScreen({ navigation }) {
     const reg =
       /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     if (email == "" && password == "") {
-      Toast.show(
-        "Email and Password cannot be empty",
-        Toast.LONG,
-        Toast.CENTER
-      );
+      // Toast.show(
+      //   "Email and Password cannot be empty",
+      //   Toast.LONG,
+      //   Toast.CENTER
+      // );
     } else if (email == "") {
-      Toast.show("Email cannot be empty", Toast.LONG, Toast.CENTER);
+      // Toast.show("Email cannot be empty", Toast.LONG, Toast.CENTER);
       setLoading(false);
     } else if (password == "") {
-      Toast.show("Password cannot be empty", Toast.LONG, Toast.CENTER);
+      // Toast.show("Password cannot be empty", Toast.LONG, Toast.CENTER);
       setLoading(false);
     } else if (artistName == "") {
-      Toast.show("Your artist name cannot be empty", Toast.LONG, Toast.CENTER);
+      //Toast.show("Your artist name cannot be empty", Toast.LONG, Toast.CENTER);
       setLoading(false);
     } else if (!reg.test(email)) {
-      Toast.show("Email is not valid", Toast.LONG, Toast.CENTER);
+      // Toast.show("Email is not valid", Toast.LONG, Toast.CENTER);
       setLoading(false);
     } else if (!pattern.test(artistName)) {
-      Toast.show("Name is not valid", Toast.LONG, Toast.CENTER);
+      // Toast.show("Name is not valid", Toast.LONG, Toast.CENTER);
       setLoading(false);
     } else if (!strongRegex.test(password)) {
-      Toast.show("Password is not valid", Toast.LONG, Toast.CENTER);
+      // Toast.show("Password is not valid", Toast.LONG, Toast.CENTER);
       setLoading(false);
     } else {
       onSignup();
@@ -79,30 +79,33 @@ export default function SignUpScreen({ navigation }) {
                 "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTqjYWb_kZ7jZ_aCJJdFjLqxS-DBaGsJGxopg&usqp=CAU",
             })
             .then(() => {
-              Toast.show(
-                "You have successfully registered ",
-                Toast.LONG,
-                Toast.CENTER
-              );
+              // Toast.show(
+              //   "You have successfully registered ",
+              //   Toast.LONG,
+              //   Toast.CENTER
+              // );
               navigation.navigate("SignIn");
             })
-            .catch((error) => Toast.show(`${error}`, Toast.LONG, Toast.CENTER));
+            .catch((error) =>
+              //  Toast.show(`${error}`, Toast.LONG, Toast.CENTER)
+              {}
+            );
           // console.log('User account created & signed in!');
         })
         .catch((error) => {
           if (error.code === "auth/email-already-in-use") {
-            Toast.show(
-              "That email address is already in use!",
-              Toast.LONG,
-              Toast.CENTER
-            );
+            // Toast.show(
+            //   "That email address is already in use!",
+            //   Toast.LONG,
+            //   Toast.CENTER
+            // );
           }
           if (error.code === "auth/invalid-email") {
-            Toast.show(
-              "That email address is invalid!",
-              Toast.LONG,
-              Toast.CENTER
-            );
+            // Toast.show(
+            //   "That email address is invalid!",
+            //   Toast.LONG,
+            //   Toast.CENTER
+            // );
           }
           console.error(error);
         });

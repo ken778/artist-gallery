@@ -17,7 +17,7 @@ import {
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { auth, firestore, storageRef } from "../../../Firebase";
-import Toast from "react-native-simple-toast";
+// import Toast from "react-native-simple-toast";
 
 const placeholder = require("../images/index.png");
 
@@ -74,33 +74,33 @@ export default function ProductModal({ navigation, isVisible, onClose }) {
   const validateProducts = () => {
     const pattern = /^[a-zA-Z]{2,40} ( [a-zA-Z]{2,40})+$/;
     if (imageUri == "") {
-      Toast.show("Please Upload your Art Image", Toast.LONG, Toast.CENTER);
+      // Toast.show("Please Upload your Art Image", Toast.LONG, Toast.CENTER);
     } else if (description == "") {
-      Toast.show(
-        "Art description should be at least 150 characters/words",
-        Toast.LONG,
-        Toast.CENTER
-      );
+      // Toast.show(
+      //   "Art description should be at least 150 characters/words",
+      //   Toast.LONG,
+      //   Toast.CENTER
+      // );
     } else if (artType == "") {
-      Toast.show(
-        "art type should not be empty or less than two characters",
-        Toast.LONG,
-        Toast.CENTER
-      );
+      // Toast.show(
+      //   "art type should not be empty or less than two characters",
+      //   Toast.LONG,
+      //   Toast.CENTER
+      // );
     } else if (artName == "") {
-      Toast.show(
-        "art name should not be empty or less than two characters",
-        Toast.LONG,
-        Toast.CENTER
-      );
+      // Toast.show(
+      //   "art name should not be empty or less than two characters",
+      //   Toast.LONG,
+      //   Toast.CENTER
+      // );
     } else if (artPrice == "") {
-      Toast.show("Art price cannot be empty", Toast.LONG, Toast.CENTER);
+      // Toast.show("Art price cannot be empty", Toast.LONG, Toast.CENTER);
     } else if (artSize == "") {
-      Toast.show(
-        `your art size should be for example "1080x1080"`,
-        Toast.LONG,
-        Toast.CENTER
-      );
+      // Toast.show(
+      //   `your art size should be for example "1080x1080"`,
+      //   Toast.LONG,
+      //   Toast.CENTER
+      // );
     } else {
       artistArtDetails();
     }
@@ -128,7 +128,6 @@ export default function ProductModal({ navigation, isVisible, onClose }) {
         docSnap.update({
           ImageUid: docSnap.id,
         });
-        set;
       });
 
     alert("you have successfully update your Market");
