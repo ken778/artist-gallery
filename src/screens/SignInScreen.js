@@ -35,17 +35,58 @@ export default function SignInScreen({ navigation }) {
       //   Toast.LONG,
       //   Toast.CENTER
       // );
+      Alert.alert(
+        "Login Failed",
+        "Your email or password is incorrect. Please Try again",
+        [
+         
+          { text: "OK", onPress: () => console.log("OK Pressed") }
+        ]
+      );
+      console.log('fields are empty')
     } else if (email == "") {
       // Toast.show("Email cannot be empty", Toast.LONG, Toast.CENTER);
+      Alert.alert(
+        "Login Failed",
+        "Please provide your email",
+        [
+         
+          { text: "OK", onPress: () => console.log("OK Pressed") }
+        ]
+      );
       setLoading(false);
     } else if (password == "") {
       // Toast.show("Password cannot be empty", Toast.LONG, Toast.CENTER);
+      Alert.alert(
+        "Login Failed",
+        "Please provide your password",
+        [
+         
+          { text: "OK", onPress: () => console.log("OK Pressed") }
+        ]
+      );
       setLoading(false);
     } else if (!reg.test(email)) {
       // Toast.show("Email is not valid", Toast.LONG, Toast.CENTER);
+      Alert.alert(
+        "Login Failed",
+        "Email is not valid",
+        [
+         
+          { text: "OK", onPress: () => console.log("OK Pressed") }
+        ]
+      );
       setLoading(false);
     } else if (!strongRegex.test(password)) {
       // Toast.show("Password is not valid", Toast.LONG, Toast.CENTER);
+      Alert.alert(
+        "Login Failed",
+        "Password is not valid",
+        [
+         
+          { text: "OK" }
+        ]
+      );
       setLoading(false);
     } else {
       signIn();
@@ -107,8 +148,8 @@ export default function SignInScreen({ navigation }) {
       </View>
       <View style={styles.footer}>
         <View style={{ marginLeft: 33, marginBottom: 15 }}>
-          <Text style={{ fontSize: 36, color: "#22180E" }}>Welcome Back !</Text>
-          <Text style={{ color: "#FFFFFF" }}>LogIn to your account</Text>
+          <Text style={{ fontSize: 36, color: "#FFFFFF" }}>Welcome Back !</Text>
+          <Text style={{ color: "#FFFFFF" }}>  LogIn to your account</Text>
         </View>
         <View style={{ alignItems: "center" }}>
           <TextInput
@@ -162,9 +203,9 @@ export default function SignInScreen({ navigation }) {
         </TouchableOpacity>
 
         <View style={{ flexDirection: "row", alignSelf: "center" }}>
-          <Text style={{}}>Don't have an account?</Text>
+          <Text style={{color:"#ffffff"}}>Don't have an account?</Text>
           <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
-            <Text style={{ color: "#22180E" }}> Sign Up</Text>
+            <Text style={{ color: "#ffffff" }}> Sign Up</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -212,7 +253,7 @@ const styles = StyleSheet.create({
   },
   inputStyle: {
     color: "white",
-    height: 70,
+    height: 40,
     width: "90%",
     borderWidth: 1,
     borderRadius: 10,

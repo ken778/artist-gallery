@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Dimensions,
+  ActivityIndicator,
 } from "react-native";
 import { Formik } from "formik";
 import { LinearGradient } from "expo-linear-gradient";
@@ -25,11 +26,12 @@ export default function SignUpScreen({ navigation }) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+
   // form validation
   const validate = () => {
+    setLoading(!loading);
     const pattern = /^[a-zA-Z]{2,40}( [a-zA-Z]{2,40})+$/;
-    const strongRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/;
+    const strongRegex =  /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
     const reg =
       /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     if (email == "" && password == "") {
@@ -38,23 +40,74 @@ export default function SignUpScreen({ navigation }) {
       //   Toast.LONG,
       //   Toast.CENTER
       // );
+
+      Alert.alert(
+        " Failed",
+        "Email and Password cannot be empty",
+        [
+          {text:"OK"}
+        ]
+      )
     } else if (email == "") {
       // Toast.show("Email cannot be empty", Toast.LONG, Toast.CENTER);
+      Alert.alert(
+        " Failed",
+        "Email cannot be empty",
+        [
+          {text:"OK"}
+        ]
+      )
       setLoading(false);
     } else if (password == "") {
       // Toast.show("Password cannot be empty", Toast.LONG, Toast.CENTER);
+      Alert.alert(
+        " Failed",
+        "Password cannot be empty",
+        [
+          {text:"OK"}
+        ]
+      )
       setLoading(false);
     } else if (artistName == "") {
       //Toast.show("Your artist name cannot be empty", Toast.LONG, Toast.CENTER);
+      Alert.alert(
+        " Failed",
+        "Your artist name cannot be empty",
+        [
+          {text:"OK"}
+        ]
+      )
       setLoading(false);
     } else if (!reg.test(email)) {
       // Toast.show("Email is not valid", Toast.LONG, Toast.CENTER);
+      Alert.alert(
+        " Failed",
+        "Email is not valid",
+        [
+          {text:"OK"}
+        ]
+      )
       setLoading(false);
-    } else if (!pattern.test(artistName)) {
+    } else if (pattern.test(artistName)) {
       // Toast.show("Name is not valid", Toast.LONG, Toast.CENTER);
+      Alert.alert(
+        " Failed",
+        "Name is not valid",
+        [
+          {text:"OK"}
+        ]
+      )
       setLoading(false);
     } else if (!strongRegex.test(password)) {
       // Toast.show("Password is not valid", Toast.LONG, Toast.CENTER);
+      console.log('Your password needs to:\n\n -be at least 8 characters long.\n\n -at least one letter and one number')
+      Alert.alert(
+        "Failed",
+        "Your password needs to:\n\n  -include both lower and upper case characters. \n\n  -include at least one number or symbol.\n\n -be at least 8 characters long.",
+        [
+          {text:"OK"}
+        ]
+      )
       setLoading(false);
     } else {
       onSignup();
@@ -66,30 +119,31 @@ export default function SignUpScreen({ navigation }) {
       auth
         .createUserWithEmailAndPassword(email, password)
         .then((userCredential) => {
+          //  navigation.navigate("SignIn");
           const artist = userCredential.user;
           firestore
             .collection("artists")
-            .doc(artist.uid)
-            .set({
-              timeStamp: new Date().toISOString(),
-              artistUid: artist.uid,
-              artistName: artistName,
-              email: artist.email,
-              photoUrl:
-                "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTqjYWb_kZ7jZ_aCJJdFjLqxS-DBaGsJGxopg&usqp=CAU",
-            })
-            .then(() => {
-              // Toast.show(
-              //   "You have successfully registered ",
-              //   Toast.LONG,
-              //   Toast.CENTER
-              // );
-              navigation.navigate("SignIn");
-            })
-            .catch((error) =>
-              //  Toast.show(`${error}`, Toast.LONG, Toast.CENTER)
-              {}
-            );
+            // .doc(artist.uid)
+            // .set({
+            //   timeStamp: new Date().toISOString(),
+            //   artistUid: artist.uid,
+            //   artistName: artistName,
+            //   email: artist.email,
+            //   photoUrl:
+            //     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTqjYWb_kZ7jZ_aCJJdFjLqxS-DBaGsJGxopg&usqp=CAU",
+            // })
+            // .then(() => {
+            //   // Toast.show(
+            //   //   "You have successfully registered ",
+            //   //   Toast.LONG,
+            //   //   Toast.CENTER
+            //   // );
+            //   navigation.navigate("SignIn");
+            // })
+            // .catch((error) =>
+            //   //  Toast.show(`${error}`, Toast.LONG, Toast.CENTER)
+            //   {}
+            // );
           // console.log('User account created & signed in!');
         })
         .catch((error) => {
@@ -114,7 +168,7 @@ export default function SignUpScreen({ navigation }) {
   return (
     <>
       <KeyboardAvoidingView
-        behavior=""
+        behavior="position"
         style={{
           flex: 1,
           backgroundColor: "#573E22",
@@ -130,7 +184,7 @@ export default function SignUpScreen({ navigation }) {
         </View>
         <View style={styles.footer}>
           <View style={{ marginLeft: 33, marginTop: 10 }}>
-            <Text style={{ fontSize: 36, color: "#22180E" }}>Sign Up</Text>
+            <Text style={{ fontSize: 36, color: "#ffffff" }}>Sign Up</Text>
             <Text style={{ color: "#FFFFFF" }}>Create your new account</Text>
           </View>
           <View>
@@ -193,7 +247,20 @@ export default function SignUpScreen({ navigation }) {
                 colors={["#CEB89E", "#9F805C"]}
                 style={styles.buttonStyle}
               >
+                
+                {!loading ? (
+              <>
                 <Text style={styles.buttonTextStyle}>Sign Up</Text>
+              </>
+            ) : (
+              <>
+                <ActivityIndicator
+                  size="large"
+                  color="#0000ff"
+                  style={styles.buttonTextStyle}
+                />
+              </>
+            )}
               </LinearGradient>
             </TouchableOpacity>
             <View style={{ flexDirection: "row", alignSelf: "center" }}>
@@ -206,10 +273,10 @@ export default function SignUpScreen({ navigation }) {
                 </Text>
               </TouchableOpacity>
            </Text> */}
-              <Text style={{}}>Already have an account?</Text>
+              <Text style={{color:"#ffffff"}}>Already have an account?</Text>
               <Text>
                 <TouchableOpacity onPress={() => navigation.navigate("SignIn")}>
-                  <Text style={{ color: "#22180E" }}> Sign In</Text>
+                  <Text style={{ color: "#ffffff" }}> Sign In</Text>
                 </TouchableOpacity>
               </Text>
             </View>

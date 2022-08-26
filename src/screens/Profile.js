@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { FlatGrid } from 'react-native-super-grid';
 import {
   StyleSheet,
   View,
@@ -10,7 +11,10 @@ import {
   TextInput,
   FlatList,
   SafeAreaView,
+  ScrollView,
   ActivityIndicator,
+  StatusBar, 
+  Alert
 } from "react-native";
 import {
   MaterialCommunityIcons,
@@ -20,23 +24,221 @@ import {
   MaterialIcons,
   Entypo,
 } from "@expo/vector-icons";
+import { FontAwesome5 } from '@expo/vector-icons';
+
+import { Video } from "expo-av";
+
 import * as ImagePicker from "expo-image-picker";
 import { auth, firestore, storageRef } from "../../Firebase";
 // import Toast from "react-native-simple-toast";
 import { globalStyles } from "../assets/styles/GlobalStyles";
+import ProfileScreen from "./ProfileScreen";
+import { LogBox } from 'react-native';
+import LoadingSpinner from "../assets/components/LoadingSpinner";
+
+LogBox.ignoreLogs(['Setting a timer']);
 
 const background = require("../assets/images/home.png");
+const staticImage =  require("../assets/images/home.png");
 
 export default function UserProfile({ route, navigation }) {
+
+
+
+
+  const image = "https://cdn.shopify.com/s/files/1/1276/6549/products/AmandiArtwork-Front_800x.jpg?v=1642510318";
+  //   const products = [
+  //   {brand:"john Jacobs", type:"Eyeclasses", name:"john blue Glasses", price:"20",productImage:image},
+  //   {brand:"john Jacobs", type:"Eyeclasses", name:"john blue Glasses", price:"70",productImage:image},
+  //   {brand:"john Jacobs", type:"Eyeclasses", name:"john blue Glasses", price:"50",productImage:image},
+  //   {brand:"kenneth Jacobs", type:"Eyeclasses", name:"john blue Glasses", price:"40",productImage:image},
+  //   {brand:"thabo Jacobs", type:"Eyeclasses", name:"john blue Glasses", price:"20",productImage:image},
+  //   {brand:"percy Jacobs", type:"Eyeclasses", name:"john blue Glasses", price:"20",productImage:image},
+  //   {brand:"percy Jacobs", type:"Eyeclasses", name:"john blue Glasses", price:"20",productImage:image},
+  //   {brand:"percy Jacobs", type:"Eyeclasses", name:"john blue Glasses", price:"20",productImage:image},
+  // ]
+  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState("");
   const [userName, setUserName] = useState(`${route.params.artistName}`);
   const [description, setDescription] = useState(`${route.params.description}`);
   const [imageUri, setimageUri] = useState(`${route.params.photoUrl}`);
   const [submit, setSubmit] = useState(false);
   // const [photoUrl, setPhotoUrl] = useState("");
-
+  const [artist, setArtist] = useState([]);
   const { artistName, artistUid, photoUrl } = route.params;
 
+  //video
+  const video = React.useRef(null);
+  const secondVideo = React.useRef(null);
+  const [status, setStatus] = React.useState({});
+  const [statusSecondVideo, setStatusSecondVideo] = React.useState({});
+  const [vid, setVid] = useState("")
+  const [introVid, setIntroVid] = useState(
+    [""]
+  )
+
+  
+ const [items, setItems] = useState([
+  { name: 'TURQUOISE', code: '#1abc9c' },
+  { name: 'EMERALD', code: '#2ecc71' },
+  { name: 'PETER RIVER', code: '#3498db' },
+  { name: 'AMETHYST', code: '#9b59b6' },
+  { name: 'WET ASPHALT', code: '#34495e' },
+  { name: 'GREEN SEA', code: '#16a085' },
+  { name: 'NEPHRITIS', code: '#27ae60' }])
+
+  console.log(items)
+  console.log(introVid.length)
+    
+
+  //getting artist 
+  const getArtUrl = () => {
+    const artistUid = auth?.currentUser?.uid;
+
+    return firestore
+      .collection("Market")
+      .where("artistUid", "==", artistUid)
+      .onSnapshot((snapShot) => {
+        const query = snapShot.docs.map((docSnap) => docSnap.data());
+        setArtist(query);
+
+
+      });
+
+
+  };
+
+  //get video from backend
+  const displayVid = () => {
+    const artistUid = auth?.currentUser?.uid;
+    setIsLoading(true)
+    return firestore.collection("introduction").where("artistUid", "==", artistUid)
+      .onSnapshot((snapShot) => {
+        const query = snapShot.docs.map((docSnap) => docSnap.data());
+       console.log('video arr',query)
+ 
+        // console.log('intro video link', query[0].introductionVideo)
+       console.log('query lenfth,' , query.length)
+         if(query.length >0){
+          setIsLoading(false)
+          setIntroVid(query[0].introductionVideo)
+         }
+         if(query.length ==0){
+          setIntroVid("")
+          setIsLoading(false)
+         }
+
+      
+
+
+      })
+  }
+
+
+  useEffect(() => {
+ 
+
+    return firestore.collection('introduction').get()
+    .then((snap) => {
+       if(!snap.empty) {
+          // work with documents
+          console.log('exists')
+          displayVid();
+
+       } else {
+         // Create some documents
+         console.log('no')
+       }
+    })
+
+  
+     
+  
+
+    // return () =>  displayVid();
+  }, [])
+
+  useEffect(() => {
+
+    getArtUrl();
+    // return () => getArtUrl();
+
+
+  }, []);
+  console.log(artist)
+
+
+
+
+  //picking video
+  const getVideo = async () => {
+    setIsLoading(true)
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.cancelled) {
+      setSubmit(!submit);
+      //setimageUri(result.uri);
+      const blob = await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.onload = function () {
+          resolve(xhr.response);
+        };
+        xhr.onerror = function () {
+          reject(new TypeError("Network request failed!"));
+        };
+        xhr.responseType = "blob";
+        xhr.open("GET", result.uri, true);
+        xhr.send(null);
+      });
+      //loader
+      setIsLoading(false);
+      const ref = storageRef.child(new Date().toISOString());
+      const snapshot = (await ref.put(blob)).ref
+        .getDownloadURL()
+        .then((vid) => {
+          setVid(vid);
+          console.log( vid, "this is setting the image too storage before 3");
+          console.log('video url from firebase', vid)
+          console.log('i ran afterwards')
+          //displaying video from firebase
+           setIsLoading(false)
+          introVideo(vid)
+          // blob.close();
+          setSubmit(false);
+        }).then(() => {
+          console.log('i ran afterwards')
+     
+          //adding video function
+
+        });
+    } else {
+      // setVid(result.uri);
+    
+    }
+  };
+
+
+  //adding video to firebase
+  const introVideo = async (yu) => {
+    const artistUid = auth?.currentUser?.uid;
+    await firestore.collection('introduction').doc(artistUid).set({
+      artistUid: artistUid,
+      introductionVideo: yu,
+
+    }).then(() => {
+      console.log('file added')
+      setIsLoading(false)
+    })
+  }
+
+
+  //
   const openImageLibrary = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -71,7 +273,7 @@ export default function UserProfile({ route, navigation }) {
             "this is setting the image too storage before 3"
           );
 
-          blob.close();
+          // blob.close();
           setSubmit(false);
         });
     } else {
@@ -87,7 +289,7 @@ export default function UserProfile({ route, navigation }) {
         artistName: userName,
         photoUrl: imageUri,
         timeStamp: new Date().toISOString(),
-        description: description,
+        bio: description,
       })
       .then(() => {
         // Toast.show(
@@ -95,6 +297,14 @@ export default function UserProfile({ route, navigation }) {
         //   Toast.LONG,
         //   Toast.CENTER
         // );
+        Alert.alert(
+          "success",
+          "you have successfully update your profile",
+          [
+           
+            { text: "OK" }
+          ]
+        );
         setModalOpen(false);
       })
       .catch((error) => {
@@ -109,6 +319,7 @@ export default function UserProfile({ route, navigation }) {
         .then(() => {
           // Toast.show("You have signed out!", Toast.LONG, Toast.CENTER);
           navigation.replace("Splash");
+          
         })
         .catch((error) => alert(error));
     } catch (e) {
@@ -117,112 +328,231 @@ export default function UserProfile({ route, navigation }) {
   };
 
   return (
-    <View>
-      <ImageBackground source={background} style={globalStyles.backgroundImg}>
-        <View style={{ top: 135 }}>
-          <Modal visible={modalOpen}>
-            <View style={styles.modalContainer}>
-              <View style={styles.closeBtnContaainer}>
-                <EvilIcons
-                  onPress={() => setModalOpen(false)}
-                  name="close"
-                  size={35}
-                  color="white"
-                />
-              </View>
-
-              <View style={styles.editprofileImgContainer}>
-                <Image
-                  source={{ uri: `${imageUri}` }}
-                  style={styles.uploadedImage}
-                />
-                {!submit ? (
-                  <AntDesign
-                    onPress={() => openImageLibrary()}
-                    style={styles.imgAddIcon}
-                    name="pluscircle"
-                    size={35}
-                    color="#E3E3E3"
-                  />
-                ) : (
-                  <ActivityIndicator
-                    style={{ alignSelf: "center", position: "absolute" }}
-                    color="black"
-                    size="small"
-                  />
-                )}
-              </View>
-
-              <TextInput
-                placeholder="Edit Username"
-                placeholderTextColor="gray"
-                value={`${userName}`}
-                onChangeText={(artistName) => setUserName(artistName)}
-                style={styles.editUserInput}
-              />
-              <TextInput
-                placeholder="description"
-                placeholderTextColor="gray"
-                value={`${description}`}
-                onChangeText={(description) => setDescription(description)}
-                style={styles.editUserInput}
-              />
-              <TouchableOpacity style={styles.updateBtn} onPress={updateUser}>
-                <Text style={styles.modalText}>Update</Text>
-              </TouchableOpacity>
+      <>
+       <ImageBackground source={background} style={globalStyles.backgroundImg}>
+           {/* The video view */}
+           {
+            isLoading? <LoadingSpinner/> :  introVid.length <=0 ?(
+              <View style ={{marginTop:70, padding:20, textAlign:"center"}}> 
+              <Text style={{
+                textAlign: "center",
+                fontSize: 20,
+                fontWeight: "bold",
+                marginTop: 20
+              }}>Your 30 sec introduction video will appear here</Text>
+                <Text style={{marginHorizontal:5, alignSelf:"center"}}>You can upload a video by using the button below</Text>
+                
+  
+                 
+  
+  
             </View>
-          </Modal>
+            ):(
+              <View style={{marginTop:70}}>
+              <Video style={styles.videoPlaye}
+                ref={video}
+                source={{ uri: `${introVid}` }}
+                useNativeControls
+                resizeMode="contain"
+  
+  
+              />
+  
+  
+  
+  
+            </View>
+            )
+           }
 
-          <View style={styles.profileImgContainer}>
-            <Image source={{ uri: `${photoUrl}` }} style={styles.profileImg} />
-            <Text style={styles.userNameText}>{artistName}</Text>
+           {
+           
+           }
+          
 
-            <TouchableOpacity
-              onPress={() => setModalOpen(true)}
-              style={styles.editBtn}
-            >
-              <Text style={styles.btnText}>Edit Profile</Text>
-            </TouchableOpacity>
+          <View style={styles.videoButtons}>
+              <View>
+              <TouchableOpacity onPress={() => introVideo()}>
+                <Entypo onPress={() => getVideo()}
+                  name="video-camera"  size={24} color="black" style={{alignSelf:'center'}} />
+              </TouchableOpacity>
+              </View>
+
+             
+            </View> 
+           
+
+           {/* profile details view*/}
+           <TouchableOpacity onPress={() => setModalOpen(true)}>
+           <View style={styles.profileNames}  >
+              <View>
+                <Image style={{ width: 50, height: 50, borderWidth: 2, borderColor: 'red', borderRadius:50 }} source={{ uri: `${photoUrl}` }} />
+              </View>
+              <View>
+                <Text style={styles.profileName}>{artistName}</Text>
+              </View>
+            </View>
+            
+           </TouchableOpacity>
+
+           
+              {/* End of profile view */}
+               {/* Bio view */}
+          <View style={{ display: 'flex', flexDirection: "row", justifyContent: 'center', alignSelf: 'center' }}>
+            <View>
+              <Text style={{ padding: 10, width: 200 }}>{description}
+              </Text>
+            </View>
+          </View>
+          {/* images heading */}
+         
+        {/* the end of Bio view */}
+        
+        {/*The buttons View */}
+         <View></View>
+        {/*The end of buttons View */}
+        
+          <View>
+            <Modal visible={modalOpen}>
+              <View style={styles.modalContainer}>
+                <View style={styles.closeBtnContaainer}>
+                  <EvilIcons
+                    onPress={() => setModalOpen(false)}
+                    name="close"
+                    size={35}
+                    color="white"
+                  />
+                </View>
+
+                <View style={styles.editprofileImgContainer}>
+                  <Image
+                    source={{ uri: `${imageUri}` }}
+                    style={styles.uploadedImage}
+                  />
+                  {!submit ? (
+                    <AntDesign
+                      onPress={() => openImageLibrary()}
+                      style={styles.imgAddIcon}
+                      name="pluscircle"
+                      size={35}
+                      color="#E3E3E3"
+                    />
+                  ) : (
+                    <ActivityIndicator
+                      style={{ alignSelf: "center", position: "absolute" }}
+                      color="black"
+                      size="small"
+                    />
+                  )}
+                </View>
+
+                <TextInput
+                  placeholder="Edit Username"
+                  placeholderTextColor="gray"
+                  value={`${userName}`}
+                  onChangeText={(artistName) => setUserName(artistName)}
+                  style={styles.editUserInput}
+                />
+                <TextInput
+                  placeholder="Bio"
+                  placeholderTextColor="gray"
+                  value={`${description}`}
+                  onChangeText={(description) => setDescription(description)}
+                  style={styles.editUserInput}
+                />
+                <TouchableOpacity style={styles.updateBtn} onPress={updateUser}>
+                  <Text style={styles.modalText}>Update</Text>
+                </TouchableOpacity>
+              </View>
+            </Modal>
+
+
+
+
           </View>
 
+
+
+
+
+         
+
+
           <View style={styles.optionsContainer}>
-            <TouchableOpacity
-              onPress={() => navigation.navigate("Terms")}
-              style={{
+            {/* uploaded art View*/}
+            <TouchableOpacity  onPress={() => navigation.navigate("Arts")}>
+            <View  style={{
                 backgroundColor: "#E3E3E3",
                 width: "80%",
-                height: 70,
+                height: 50,
                 flexDirection: "row",
                 alignSelf: "center",
                 alignItems: "center",
+                justifyContent:"space-around",
                 borderRadius: 20,
-              }}
-            >
-              <MaterialIcons
+                marginVertical: 15,
+                marginTop:-5
+              }}>
+                   <View style={{alignSelf:"auto",width:'20%'}} >
+                   <MaterialIcons
                 name="notes"
                 size={24}
                 color={"#0E1822"}
-                style={{
+                style={{  
                   marginHorizontal: 10,
                   overflow: "hidden",
                   color: "#0E1822",
+                 
                 }}
               />
-              <Text
-                style={{
-                  color: "#0E1822",
-                  alignSelf: "center",
-                  marginHorizontal: 30,
-                }}
-              >
-                Terms & Conditions
-              </Text>
+                   </View>
+                   <View  style={{width:"70%"}}>
+                   <Text style={{alignSelf:"flex-start"}}>  Aploaded Art</Text>
+                   </View>
+
+            </View>
             </TouchableOpacity>
+            {/* Terms and conditions View */}
+            <TouchableOpacity  onPress={() => navigation.navigate("Terms")}>
+            <View  style={{
+                backgroundColor: "#E3E3E3",
+                width: "80%",
+                height: 50,
+                flexDirection: "row",
+                alignSelf: "center",
+                alignItems: "center",
+                justifyContent:"space-around",
+                borderRadius: 20,
+                marginVertical: 15,
+              }}>
+                   <View style={{alignSelf:"auto",width:'20%', }} >
+                   <MaterialIcons
+                name="notes"
+                size={24}
+                color={"#0E1822"}
+                style={{  
+                  marginHorizontal: 10,
+                  overflow: "hidden",
+                  color: "#0E1822",
+                 
+                }}
+              />
+                   </View>
+                   <View  style={{width:"70%"}}>
+                   <Text style={{alignSelf:"flex-start"}}>   Terms & Conditions</Text>
+                   </View>
+
+            </View>
+            </TouchableOpacity>
+            
+           
+            {/* app vision View */}
+            
             <View
               style={{
                 backgroundColor: "#E3E3E3",
                 width: "80%",
-                height: 70,
+                height: 50,
                 flexDirection: "column",
                 alignSelf: "center",
                 alignItems: "center",
@@ -235,25 +565,172 @@ export default function UserProfile({ route, navigation }) {
                   color: "#0E1822",
                   fontSize: 16,
                   fontWeight: "600",
-                  marginVertical: 10,
+                  marginVertical: 8,
                 }}
               >
                 App Version
               </Text>
-              <Text style={{ color: "gray", fontSize: 12, marginVertical: -5 }}>
+              <Text style={{ color: "gray", fontSize: 12, marginVertical: -10 }}>
                 v1.0.0
               </Text>
             </View>
-            <TouchableOpacity
+           {/* logout View */}
+           <TouchableOpacity   onPress={signoutUser}>
+           <View  style={{
+                backgroundColor: "#E3E3E3",
+                width: "80%",
+                height: 50,
+                flexDirection: "row",
+                alignSelf: "center",
+                alignItems: "center",
+                justifyContent:"space-around",
+                borderRadius: 20,
+                marginVertical: 15,
+              }}>
+                   <View style={{alignSelf:"auto",width:'20%',}} >
+                   <AntDesign
+                name="logout"
+                size={24}
+                color={"#0E1822"}
+                style={{
+                  marginHorizontal: 10,
+                  overflow: "hidden",
+                  color: "#0E1822",
+                }}
+              />
+                   </View>
+                   <View  style={{width:"70%"}}>
+                   <Text style={{alignSelf:"flex-start"}}>      Logout</Text>
+                   </View>
+
+            </View>
+            </TouchableOpacity>
+           
+          
+
+
+
+          {/* another button */}
+          {/* <TouchableOpacity
               onPress={signoutUser}
               style={{
                 backgroundColor: "#E3E3E3",
                 width: "80%",
-                height: 70,
+                height: 50,
                 flexDirection: "row",
                 alignSelf: "center",
                 alignItems: "center",
+                 borderRadius: 20,
+                // marginVertical: 10,
+              }}
+            >
+              <AntDesign
+                name="logout"
+                size={24}
+                color={"#0E1822"}
+                style={{
+                  marginHorizontal: 10,
+                  overflow: "hidden",
+                  color: "#0E1822",
+                }}
+              />
+              <Text
+                style={{
+                  marginHorizontal: 80,
+                  color: "#0E1822",
+                  alignSelf: "center",
+                 marginRight:4
+                }}
+              >
+                   Logout
+              </Text>
+            </TouchableOpacity> */}
+          {/* <TouchableOpacity  onPress={() => navigation.navigate("Arts")}>
+          <View
+          
+              style={{
+                backgroundColor: "#E3E3E3",
+                width: "80%",
+                height: 50,
+                flexDirection: "row",
+                justifyContent:"space-evenly",
+                alignSelf: "center",
+                alignItems: "center",
                 borderRadius: 20,
+                marginVertical: 15,
+              }}
+            >
+                <MaterialIcons
+                name="notes"
+                size={24}
+                color={"#0E1822"}
+                style={{  
+                  marginHorizontal: 10,
+                  marginLeft:-70,
+                  overflow: "hidden",
+                  color: "#0E1822",
+                }}
+              />
+              <Text
+                style={{
+                  color: "#0E1822",
+                  fontSize: 16,
+                  fontWeight: "600",
+                  marginTop:5,
+                  marginRight:25
+              
+                }}
+              >
+               Aploaded Art
+              </Text>
+              
+            </View>
+            </TouchableOpacity> */}
+            {/* <TouchableOpacity
+              onPress={() => navigation.navigate("Terms")}
+              style={{
+                backgroundColor: "#E3E3E3",
+                width: "80%",
+                height: 50,
+                flexDirection: "row",
+                alignSelf: "center",
+                alignItems: "center",
+                 borderRadius: 20,
+              }}
+            >
+              <MaterialIcons
+                name="notes"
+                size={24}
+                color={"#0E1822"}
+                style={{  
+                  marginHorizontal: 10,
+                  overflow: "hidden",
+                  color: "#0E1822",
+                }}
+              />
+              <Text
+                style={{
+                  color: "#0E1822",
+                  alignSelf: "center",
+                  marginHorizontal: 30,
+               
+                }}
+              >
+                Terms & Conditions
+              </Text>
+            </TouchableOpacity> */}
+           
+            
+            {/* <TouchableOpacity
+              onPress={signoutUser}
+              style={{
+                backgroundColor: "#E3E3E3",
+                width: "80%",
+                height: 50,
+                flexDirection: "row",
+                alignSelf: "center",
+                alignItems: "center",
+                 borderRadius: 20,
                 // marginVertical: 10,
               }}
             >
@@ -276,11 +753,19 @@ export default function UserProfile({ route, navigation }) {
               >
                 Logout
               </Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
-        </View>
-      </ImageBackground>
-    </View>
+
+  
+       </ImageBackground>
+      
+    
+     
+      
+     
+   
+    </>
+    
   );
 }
 
@@ -289,18 +774,25 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%'
+  },
 
   profileImg: {
     width: 200,
     height: 200,
-    borderRadius: 100,
+    // borderRadius: 100,
     bottom: 85,
   },
 
   profileImgContainer: {
     width: "80%",
     height: 215,
-    borderRadius: 15,
+    // borderRadius: 15,
     backgroundColor: "#E3E3E3",
     alignSelf: "center",
     alignItems: "center",
@@ -309,7 +801,7 @@ const styles = StyleSheet.create({
 
   topLeftIcon: {
     borderWidth: 1,
-    borderRadius: 14,
+    // borderRadius: 14,
     borderColor: "#0E1822",
     width: 45,
     height: 45,
@@ -321,12 +813,14 @@ const styles = StyleSheet.create({
     fontSize: 20,
     bottom: 75,
   },
-
+  safe : {
+    paddingTop: StatusBar.currentHeight,
+  },
   editBtn: {
     width: 120,
     height: 50,
     backgroundColor: "black",
-    borderRadius: 15,
+     borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
     bottom: 70,
@@ -338,7 +832,9 @@ const styles = StyleSheet.create({
   },
 
   optionsContainer: {
-    top: 85,
+   
+
+  
   },
 
   modalContainer: {
@@ -355,7 +851,7 @@ const styles = StyleSheet.create({
   editprofileImgContainer: {
     width: 200,
     height: 200,
-    borderRadius: 150,
+     borderRadius: 150,
     backgroundColor: "gray",
     justifyContent: "center",
     alignItems: "center",
@@ -370,13 +866,14 @@ const styles = StyleSheet.create({
     marginVertical: 20,
     backgroundColor: "white",
     color: "#000",
+    width:250
   },
 
   updateBtn: {
     width: 220,
     height: 50,
     backgroundColor: "black",
-    borderRadius: 15,
+     borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -400,7 +897,7 @@ const styles = StyleSheet.create({
   uploadedImage: {
     width: 200,
     height: 200,
-    borderRadius: 100,
+     borderRadius: 100,
   },
   imgAddIcon: {
     position: "absolute",
@@ -409,4 +906,88 @@ const styles = StyleSheet.create({
   flatlist: {
     height: 280,
   },
+  profileNames: {
+    display: 'flex',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    justifyContent: 'space-evenly',
+    // borderWidth:2,
+    padding:10,
+  },
+  profileName: {
+    padding: 12,
+    marginLeft: -60,
+    fontSize: 20,
+    fontWeight:"bold"
+  },
+  mainContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    justifyContent: 'space-around'
+  },
+  videoButtons: {
+    display: 'flex',
+    flexDirection: 'row'
+  },
+  addButton: {
+    margin: 5,
+    backgroundColor: "#E3E3E3",
+  
+    width: 200,
+    //  borderRadius: 20,
+    textAlign: 'center',
+    borderRadius: 15,
+
+  },
+  videoPlaye: {
+    width: '100%',
+    height: 150,
+
+  },
+  artHeader:{
+    display:"flex",
+    flexDirection:"row",
+    justifyContent:'space-evenly',
+    // borderWidth:2
+
+    
+  },
+  gridView: {
+    marginTop: 10,
+    flex: 1,
+   
+  },
+  itemContainer: {
+    justifyContent: 'flex-end',
+    borderRadius: 5,
+    padding: 10,
+    height: 100,
+    borderWidth:1,
+    borderColor: "black",
+    borderRadius:12
+  },
+  itemName: {
+    fontSize: 16,
+    color: '#fff',
+    fontWeight: '600',
+  },
+  itemCode: {
+    fontWeight: '600',
+    fontSize: 12,
+    color: '#fff',
+  },
+  videoButtons:{
+    marginTop:10,
+    flexDirection:'row',
+    justifyContent: 'space-around',
+    backgroundColor: "#E3E3E3",
+    width:'70%',
+    alignSelf:'center',
+    padding:5,
+    borderRadius:15
+  }
+
 });

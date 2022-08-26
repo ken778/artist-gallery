@@ -28,6 +28,12 @@ import ArtWorkScreen from "./src/screens/ArtWorkScreen";
 import SocialMediaScreen from "./src/screens/SocialMediaScreen";
 import ArtistProfileScreen from "./src/screens/ArtistProfileScreen";
 import { TabNavigator2 } from "./src/screens/HomeScreen";
+import HomeScreen from "./src/screens/HomeScreen";
+import EditProfile from "./src/screens/EditProfile";
+import UploadedArt from "./src/screens/UploadedArt";
+import Sold from "./src/screens/Sold";
+
+
 
 const Stack = createNativeStackNavigator();
 const Tab = createMaterialTopTabNavigator();
@@ -59,12 +65,13 @@ const TabNavigator = () => {
         swipeEnabled: false,
       }}
     >
-      {/* <Tab.Screen name='Home' component={Home} /> */}
+      {/* <Tab.Screen name='Home' component={HomeScreen}
+       /> */}    
       <Tab.Screen
         options={{ headerShown: false }}
         name="Sales"
         component={Sales}
-      />
+      /> 
       <Tab.Screen
         options={{ headerShown: false }}
         name="Products"
@@ -82,6 +89,7 @@ export default function App({ navigation, route }) {
   const [artistUid, setArtistUid] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
   const [description, setDescription] = useState("");
+
 
   // toast message
   // const toastConfig = {
@@ -152,10 +160,11 @@ export default function App({ navigation, route }) {
         setUser("");
       }
     });
-
+    console.log(artistUid)
     return () => {
       unregister();
     };
+  
   }, []);
 
   return (
@@ -170,7 +179,8 @@ export default function App({ navigation, route }) {
         }}
       >
         {artist ? (
-          <>
+          <>  
+             {/* te */}
             <Stack.Screen
               name="LandingPage"
               component={TabNavigator}
@@ -192,14 +202,14 @@ export default function App({ navigation, route }) {
                 },
 
                 headerRight: () => (
-                  <View
+                  <View key={artistUid}
                     style={{
                       flexDirection: "row",
                       width: 45,
                       justifyContent: "space-between",
                     }}
                   >
-                    <TouchableOpacity
+                    <TouchableOpacity key={artistUid}
                       onPress={() =>
                         navigation.navigate("Profile", {
                           artistUid: artistUid,
@@ -210,7 +220,8 @@ export default function App({ navigation, route }) {
                         })
                       }
                     >
-                      <Image
+
+                      <Image 
                         source={{ uri: `${User}` }}
                         style={{
                           width: 30,
@@ -224,11 +235,23 @@ export default function App({ navigation, route }) {
                 ),
               })}
             />
+            
             <Stack.Screen
-              options={{ headerShown: false }}
+                 options={{ headerShown: true, headerTransparent: true }}
               name="Terms"
               component={TermsAndConditions}
             />
+            <Stack.Screen
+                 options={{ headerShown: true, headerTransparent: true }}
+              name="Arts"
+              component={UploadedArt}
+            />
+            <Stack.Screen
+                 options={{ headerShown: true, headerTransparent: true }}
+              name="sold"
+              component={Sold}
+            />
+           
             <Stack.Screen
               options={{ headerShown: true, headerTransparent: true }}
               name="Profile"
@@ -239,6 +262,7 @@ export default function App({ navigation, route }) {
               name="Products"
               component={Products}
             />
+          
             <Stack.Screen
               options={{ headerShown: false }}
               name="Sales"
@@ -275,14 +299,14 @@ export default function App({ navigation, route }) {
 
                 //title: "Gallery 360 Africa 2 nested",
                 headerRight: () => (
-                  <View
+                  <View key={artistUid}
                     style={{
                       flexDirection: "row",
                       width: 45,
                       justifyContent: "space-between",
                     }}
                   >
-                    <TouchableOpacity
+                    {/* <TouchableOpacity
                       onPress={() =>
                         navigation.navigate("Profile", {
                           artistUid: artistUid,
@@ -293,7 +317,7 @@ export default function App({ navigation, route }) {
                         })
                       }
                     >
-                      <Image
+                      <Image 
                         source={{ uri: `${User}` }}
                         style={{
                           width: 30,
@@ -302,7 +326,7 @@ export default function App({ navigation, route }) {
                           backgroundColor: "lightgrey",
                         }}
                       />
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                   </View>
                 ),
               })}

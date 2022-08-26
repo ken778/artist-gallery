@@ -1,9 +1,14 @@
-import { StyleSheet, Text, View, ScrollView } from "react-native";
+import { StyleSheet, Text, View, ScrollView, Image, ImageBackground} from "react-native";
 import React from "react";
+import { globalStyles } from "../assets/styles/GlobalStyles";
+const background = require("../assets/images/home.png");
+
 
 export default function TermsAndConditions({ navigation }) {
   return (
-    <ScrollView style={{ flexGrow: 1, width: "100%", top: 70 }}>
+    <ImageBackground source={background} style={globalStyles.backgroundImg}>
+      <View style={{marginTop:40}}></View>
+    <ScrollView style={{ padding:20, flexGrow: 1, width: "100%", top: 70 }}>
       <Text
         style={{
           fontWeight: "800",
@@ -178,5 +183,6 @@ export default function TermsAndConditions({ navigation }) {
         pains."
       </Text>
     </ScrollView>
+    </ImageBackground>
   );
 }

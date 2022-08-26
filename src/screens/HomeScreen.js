@@ -15,6 +15,7 @@ export const TabNavigator2 = ({ navigation }) => {
     <Tab.Navigator
       tabBarOptions={{
         elevation: 0,
+        
 
         marginBottom: 5,
         tabStyle: {

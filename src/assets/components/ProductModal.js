@@ -35,7 +35,7 @@ export default function ProductModal({ navigation, isVisible, onClose }) {
 
   const openImageLibrary = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
@@ -62,7 +62,7 @@ export default function ProductModal({ navigation, isVisible, onClose }) {
         .getDownloadURL()
         .then((imageUrl) => {
           setimageUri(imageUrl);
-          blob.close();
+          // blob.close();
           setSubmit(false);
         });
     } else {

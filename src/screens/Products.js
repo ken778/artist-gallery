@@ -30,6 +30,7 @@ export default function Products({ navigation }) {
   const [submit, setSubmit] = useState(false);
   //
   const [artist, setArtist] = useState([]);
+  const [exhibition, setExhibiUrl] = useState([]);
   const [date, setDate] = useState(new Date());
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -56,9 +57,10 @@ export default function Products({ navigation }) {
     setVisible(false);
   };
 
+  //selecting image and stororing to firebase
   const openImageLibrary = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
@@ -85,7 +87,7 @@ export default function Products({ navigation }) {
         .getDownloadURL()
         .then((imageUrl) => {
           setimageUri(imageUrl);
-          blob.close();
+         
           setSubmit(false);
         });
     } else {
@@ -94,6 +96,8 @@ export default function Products({ navigation }) {
     }
   };
 
+
+  //validating exhibition
   const validateExhibition = () => {
     const pattern = /^[a-zA-Z]{2,40} ( [a-zA-Z]{2,40})+$/;
     if (imageUri == "") {
@@ -155,23 +159,40 @@ export default function Products({ navigation }) {
       });
   };
 
-  const getArtUrl = () => {
-    const artistUid = auth?.currentUser?.uid;
+ //getting Exhibition from firebase
+ const exhibitionUrl = () => {
+  const artistUid = auth?.currentUser?.uid;
 
-    return firestore
-      .collection("Market")
-      .where("ArtistUid", "==", artistUid)
-      .onSnapshot((snapShot) => {
-        const query = snapShot.docs.map((docSnap) => docSnap.data());
-        setArtist(query);
-      });
-  };
+  return firestore
+    .collection("exhibition")
+    .where("artistUid", "==", artistUid)
+    .onSnapshot((snapShot) => {
+      const dat = snapShot.docs.map((docSnap) => docSnap.data());
+      setExhibiUrl(dat);
+      console.log(dat)
+     
+    });
+};
+
+  //getting art from market
+  // const getArtUrl = () => {
+  //   const artistUid = auth?.currentUser?.uid;
+
+  //   return firestore
+  //     .collection("Market")
+  //     .where("ArtistUid", "==", artistUid)
+  //     .onSnapshot((snapShot) => {
+  //       const query = snapShot.docs.map((docSnap) => docSnap.data());
+  //       setArtist(query);
+  //     });
+  // };
+  
   useEffect(() => {
-    getArtUrl();
-
-    return () => getArtUrl();
+    exhibitionUrl();
+    // getArtUrl();
+    // return () => exhibitionUrl();
   }, []);
-
+  console.log(exhibition);
   //
   return (
     <ScrollView horizontal={true} style={styles.container}>
@@ -202,12 +223,14 @@ export default function Products({ navigation }) {
         <FlatList
           horizontal
           showsHorizontalIndicator={false}
-          data={artist}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => {
+          data={exhibition}
+          keyExtractor={(item, index) => index}
+          renderItem={({ item,index }) => {
             return (
-              <View style={styles.listItem2}>
-                <Image source={{ uri: item.artUrl }} style={styles.img} />
+              <View  style={styles.listItem2} key={index}>
+                 <Image   source={{ uri: item.exhibitionImage }} style={styles.img} /> 
+            
+            
               </View>
             );
           }}
