@@ -7,6 +7,7 @@ import {
   ScrollView,
   Dimensions,
   TouchableOpacity,
+  Pressable,
 } from "react-native";
 // import PieChart from "react-native-pie-chart";
 //import { LineChart } from "react-native-chart-kit";
@@ -17,11 +18,20 @@ import LoadingSpinner from "../assets/components/LoadingSpinner";
 import { MaterialIcons } from "@expo/vector-icons";
 import { FontAwesome } from '@expo/vector-icons';
 
+import * as ImagePicker from 'expo-image-picker';
+// import Pressable from "react-native/Libraries/Components/Pressable/Pressable";
+
 const screenWidth = Dimensions.get("screen").width;
 
 export default function Sales({ navigation }) {
 
   const [amount, setAmount] = useState([]);
+  const [sold, setSold] = useState()
+
+
+
+
+
 
   const widthAndHeight = 250;
   const series = [123, 321, 123, 789, 537];
@@ -49,11 +59,11 @@ export default function Sales({ navigation }) {
        "password":"gow"
     }
  ];
- const totalPrice = amount.reduce((total, curVal) => {
-  return total + curVal.price;
-}, 0);
+//  const totalPrice = amount.reduce((total, curVal) => {
+//   return total + curVal.price;
+// }, 0);
 
-console.log('total',totalPrice);
+//console.log('total',totalPrice);
  let sampleData = [{
   
   data: [
@@ -64,7 +74,7 @@ console.log('total',totalPrice);
     {x: 'May', y: 0},
     {x: 'June', y: 0},
     {x: 'July', y: 0},
-    {x: 'August', y: totalPrice},
+    {x: 'August', y:0},
     {x: 'September', y: 0},
     {x: 'October', y: 0},
     {x: 'November', y: 0},
@@ -89,41 +99,55 @@ const items = [
 //  const prices = [
 //   {title:"One",prix:100},
 //   {title:"Two",prix:200},
-//   {title:"Three",prix:300}
+//   {title:"Three",prix:300} 
 // ];
 
  //fetching amout from firebase
- const getArtUrl = () => {
+
+
+//  const getArtUrl = () => {
   
-  const artistUid = auth?.currentUser?.uid;
+//   const artistUid = auth?.currentUser?.uid;
 
-  return firestore
-    .collection("Market")
-    .where("ArtistUid", "==", artistUid)
-    .onSnapshot((snapShot) => {
-      const query = snapShot.docs.map((docSnap) => docSnap.data());
-      setAmount(query);
-     console.log('amount',query)
-    });
-};
+//   return firestore
+//     .collection("Market")
+//     .where("ArtistUid", "==", artistUid)
+//     .onSnapshot((snapShot) => {
+//       const query = snapShot.docs.map((docSnap) => docSnap.data());
+//       setAmount(query);
+//      console.log('amount',query)
+//     });
+// };
 
 
-const getPayments = () =>{
-  return firestore.collection('payment').onSnapshot((snapShot=>{
-    const query  = snapShot.docs.map((docSnap)=>docSnap.data());
-    console.log("payments", query)
-  }))
-}
+// const getPayments = () =>{
+//   return firestore.collection('payment').where("uuid", '==' , 'eaow7cYStDO4Mc2PrQ8fIoHaIeJ3').onSnapshot((snapShot=>{
+//     const query  = snapShot.docs.map((docSnap)=>docSnap.data());
+//     console.log("payments", query)
+
+
+//    query.forEach((re)=>{
+//         console.log('res', re.totalAmount)
+//    })
+  
+//     setSold(query)
+//   }))
+// }
+
 
 
 
 
 useEffect (() => {
-  getArtUrl();
-  getPayments();
+ // getArtUrl();
+  //getPayments();
 
 
 }, []);
+
+//console.log('bought',sold)
+
+
 
 
 
@@ -140,19 +164,15 @@ useEffect (() => {
       <View style={styles.AmountContainer}>
         
        
-        <Text style={styles.Total}>R{ totalPrice}.00</Text>
+        {/* <Text style={styles.Total}>R{ totalPrice}.00</Text> */}
         
 
         
       </View>
-      <View><Text style={{alignSelf:'center',paddin:5,marginBottom:-20,paddingTop:20}}>PRODUCT SALES</Text></View>
-      <View style={{height:5,backgroundColor:'black', width:'20%',alignSelf:'center', marginTop:25,}}></View>
-      <View style={{marginTop:20, width:'97%', marginLeft:'auto', marginRight:'auto'}}>
-        
-      <PureChart data={sampleData} type='bar' />
-      </View>
+
      
-      
+
+
       <TouchableOpacity  onPress={() => navigation.navigate("sold")}>
       <View  style={{
                 backgroundColor: "#E3E3E3",
@@ -182,6 +202,19 @@ useEffect (() => {
 
             </View>   
       </TouchableOpacity>
+
+      <View><Text style={{alignSelf:'center',paddin:5,marginBottom:-20,paddingTop:20}}>PRODUCT SALES</Text></View>
+      
+      
+      <View style={{height:5,backgroundColor:'black', width:'20%',alignSelf:'center', marginTop:25,}}></View>
+      
+      <View style={{marginTop:20, width:'97%', marginLeft:'auto', marginRight:'auto', backgroundColor:"yellow"}}>
+        
+      <PureChart style={styles.Chart} data={sampleData} type='bar' />
+      </View>
+     
+      
+    
      
 
     
@@ -192,6 +225,10 @@ useEffect (() => {
 }
 
 const styles = StyleSheet.create({
+  Chart:{
+      height:400,
+      backgroundColor: "yellow"
+  },
   container: {
     height: "100%",
     width: "100%",

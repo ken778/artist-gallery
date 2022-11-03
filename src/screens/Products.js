@@ -13,6 +13,7 @@ import {
   TextInput,
   Alert,
   ActivityIndicator,
+  KeyboardAvoidingView,
 } from "react-native";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
@@ -143,7 +144,7 @@ export default function Products({ navigation }) {
         address: address,
         description: description,
         exhibitionTitle: title,
-        date: date,
+        date:moment(date).format("DD MMMM YYYY").toString(),
         timeStamp: new Date().toISOString(),
       })
       .then((docSnap) => {
@@ -236,7 +237,8 @@ export default function Products({ navigation }) {
           }}
         />
         {/* Exhibition Modal */}
-        <Modal
+         <KeyboardAvoidingView behavior="padding">
+         <Modal
           animationType="slide"
           transparent={true}
           visible={modalVisible1}
@@ -244,7 +246,10 @@ export default function Products({ navigation }) {
             setModalVisible1(!modalVisible1);
           }}
         >
-          <View style={styles.centeredView}>
+           <ScrollView>
+           <View style={styles.centeredView}>
+               {/* view modal */}
+
             <View style={styles.modalView}>
               <View style={{ left: 135, bottom: 25 }}>
                 <AntDesign
@@ -296,6 +301,8 @@ export default function Products({ navigation }) {
                   )}
                 </TouchableOpacity>
               </View>
+              {/*  */}
+              
               <View style={{ bottom: 35 }}>
                 <View style={styles.TextField}>
                   <View style={{ flexDirection: "row", marginHorizontal: 3 }}>
@@ -312,6 +319,9 @@ export default function Products({ navigation }) {
                   </View>
                   <TextInput
                     style={styles.input}
+                    multiline={true}
+                    numberOfLines={2}
+                    textAlignVertical = "top"
                     onChangeText={(title) => setExhibition(title)}
                     //value={name}
                     placeholder="Enter Exhibition title"
@@ -370,6 +380,7 @@ export default function Products({ navigation }) {
                         flexDirection: "row",
                         color: "#ceb89e",
                         marginHorizontal: 10,
+                        marginTop: 14,
                         fontWeight: "bold",
                       }}
                     >
@@ -378,6 +389,9 @@ export default function Products({ navigation }) {
                   </View>
                   <TextInput
                     style={styles.input}
+                    multiline={true}
+                    numberOfLines={3}
+                    textAlignVertical = "top"
                     onChangeText={(address) => setAddress(address)}
                     //value={price}
                     placeholder="Enter Address"
@@ -390,6 +404,7 @@ export default function Products({ navigation }) {
                         flexDirection: "row",
                         color: "#ceb89e",
                         marginHorizontal: 10,
+                        marginTop: 14,
                         fontWeight: "bold",
                       }}
                     >
@@ -398,6 +413,9 @@ export default function Products({ navigation }) {
                   </View>
                   <TextInput
                     style={styles.input}
+                    multiline={true}
+                    numberOfLines={3}
+                    textAlignVertical = "top"
                     onChangeText={(description) => setDescription(description)}
                     //value={price}
                     placeholder="Enter Art Description"
@@ -411,8 +429,14 @@ export default function Products({ navigation }) {
                 <Text style={styles.textStyle}>Add</Text>
               </TouchableOpacity>
             </View>
+               {/* view modal */}
+
           </View>
+           </ScrollView>
+         
         </Modal>
+         </KeyboardAvoidingView>
+       
       </View>
     </ScrollView>
   );
@@ -524,9 +548,9 @@ const styles = StyleSheet.create({
     borderColor: "#ceb89e",
   },
   input: {
-    height: 40,
+ 
     margin: 12,
-    padding: 10,
+ 
     color: "#ceb89e",
   },
   image: {

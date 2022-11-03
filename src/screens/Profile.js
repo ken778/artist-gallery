@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useRef } from "react";
 import { FlatGrid } from 'react-native-super-grid';
 import {
   StyleSheet,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Text,
   ImageBackground,
+  KeyboardAvoidingView,
   Modal,
   TextInput,
   FlatList,
@@ -45,7 +46,7 @@ export default function UserProfile({ route, navigation }) {
 
 
 
-
+ const placeHolderImage = "https://www.seekpng.com/png/full/966-9665317_placeholder-image-person-jpg.png"
   const image = "https://cdn.shopify.com/s/files/1/1276/6549/products/AmandiArtwork-Front_800x.jpg?v=1642510318";
   //   const products = [
   //   {brand:"john Jacobs", type:"Eyeclasses", name:"john blue Glasses", price:"20",productImage:image},
@@ -64,10 +65,11 @@ export default function UserProfile({ route, navigation }) {
   const [description, setDescription] = useState(`${route.params.description}`);
   const [imageUri, setimageUri] = useState(`${route.params.photoUrl}`);
   const [submit, setSubmit] = useState(false);
+  const [introClip, setIntroClip] = useState('');
   // const [photoUrl, setPhotoUrl] = useState("");
   const [artist, setArtist] = useState([]);
   const { artistName, artistUid, photoUrl } = route.params;
-
+  const [userDetails, setUserDetails] = useState({})
   //video
   const video = React.useRef(null);
   const secondVideo = React.useRef(null);
@@ -77,7 +79,13 @@ export default function UserProfile({ route, navigation }) {
   const [introVid, setIntroVid] = useState(
     [""]
   )
+  const [bio, setBio] = useState('')
+  const [empty, setEmpty] = useState(false)
 
+  //testing video
+  const [clip,setClip] = useState('')
+  const [userId, setUserId] = useState('')
+ 
   
  const [items, setItems] = useState([
   { name: 'TURQUOISE', code: '#1abc9c' },
@@ -135,38 +143,72 @@ export default function UserProfile({ route, navigation }) {
       })
   }
 
+     //fetching data from firebase
+     const getUserData = ()=>{
+      const artistUid = auth?.currentUser?.uid;
+      console.log('rrrrrr',artistUid)
+      setUserId(artistUid)
+  
+      return firestore
+        .collection("artists")
+        .where("artistUid", "==", artistUid)
+        .onSnapshot((snapShot) => {
+          const query = snapShot.docs.map((docSnap) => docSnap.data());
+          //setAmount(query);
+  
+         console.log('details',query)
+          setBio(query[0].bio)
+         if(query[0]){
+          setUserDetails(query[0])
+          setIntroClip(query[0].introClip)
+         
+          console.log('something',query)
+         }else{
+           console.log('nothing',query)
+  
+         }
+         
+        });    
+    }
 
   useEffect(() => {
  
 
-    return firestore.collection('introduction').get()
-    .then((snap) => {
-       if(!snap.empty) {
-          // work with documents
-          console.log('exists')
-          displayVid();
+    // return firestore.collection('introduction').get()
+    // .then((snap) => {
+    //    if(!snap.empty) {
+    //       // work with documents
+    //       console.log('exists')
+    //       displayVid();
 
-       } else {
-         // Create some documents
-         console.log('no')
-       }
-    })
+    //    } else {
+    //      // Create some documents
+    //      console.log('no')
+    //    }
+    // })
+    getUserData()
 
-  
      
   
 
     // return () =>  displayVid();
   }, [])
 
+   console.log('user data',userDetails)
+   console.log('user id',userId)
+  
+ 
   useEffect(() => {
-
+   
     getArtUrl();
     // return () => getArtUrl();
-
+    
+    
 
   }, []);
   console.log(artist)
+
+
 
 
 
@@ -177,7 +219,7 @@ export default function UserProfile({ route, navigation }) {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
-      aspect: [4, 3],
+   
       quality: 1,
     });
 
@@ -197,18 +239,46 @@ export default function UserProfile({ route, navigation }) {
         xhr.send(null);
       });
       //loader
-      setIsLoading(false);
+      setIsLoading(true);
       const ref = storageRef.child(new Date().toISOString());
       const snapshot = (await ref.put(blob)).ref
         .getDownloadURL()
         .then((vid) => {
           setVid(vid);
-          console.log( vid, "this is setting the image too storage before 3");
+         
+          console.log( vid, "this is setting the video to storage");
           console.log('video url from firebase', vid)
           console.log('i ran afterwards')
           //displaying video from firebase
            setIsLoading(false)
-          introVideo(vid)
+
+           //commented out
+
+           //introVideo(vid)
+
+
+           //uploading a clipVid
+           vidClip(vid).then(()=>{
+            
+        
+
+            setIntroClip(vid)
+           
+
+           }).catch((error)=>{
+            // alert('vid not updated!')
+            Alert.alert(
+              "Failed",
+              "Failed to upload a video.",
+              [
+               
+                { text: "OK" }
+              ]
+            );
+             console.log(error)
+           })
+
+
           // blob.close();
           setSubmit(false);
         }).then(() => {
@@ -227,6 +297,7 @@ export default function UserProfile({ route, navigation }) {
   //adding video to firebase
   const introVideo = async (yu) => {
     const artistUid = auth?.currentUser?.uid;
+    
     await firestore.collection('introduction').doc(artistUid).set({
       artistUid: artistUid,
       introductionVideo: yu,
@@ -234,6 +305,27 @@ export default function UserProfile({ route, navigation }) {
     }).then(() => {
       console.log('file added')
       setIsLoading(false)
+      
+  
+    })
+  }
+
+  const vidClip = async(link)=>{
+    firestore
+    .collection("artists")
+    .doc(artistUid)
+    .set({
+      artistName: userName,
+      photoUrl: imageUri,
+      timeStamp: new Date().toISOString(),
+      bio: bio,
+      introClip: link,
+      artistUid:userId
+      
+    }).then(()=>{
+        // alert('updated')
+    }).catch((error)=>{
+         console.log(error)
     })
   }
 
@@ -243,7 +335,7 @@ export default function UserProfile({ route, navigation }) {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [4, 3],
+      
       quality: 1,
     });
 
@@ -277,6 +369,7 @@ export default function UserProfile({ route, navigation }) {
           setSubmit(false);
         });
     } else {
+      //saving url from 
       setimageUri(result.uri);
     }
   };
@@ -289,7 +382,8 @@ export default function UserProfile({ route, navigation }) {
         artistName: userName,
         photoUrl: imageUri,
         timeStamp: new Date().toISOString(),
-        bio: description,
+        bio: bio,
+
       })
       .then(() => {
         // Toast.show(
@@ -318,7 +412,8 @@ export default function UserProfile({ route, navigation }) {
         .signOut()
         .then(() => {
           // Toast.show("You have signed out!", Toast.LONG, Toast.CENTER);
-          navigation.replace("Splash");
+
+           navigation.replace("Onboarding");
           
         })
         .catch((error) => alert(error));
@@ -326,13 +421,61 @@ export default function UserProfile({ route, navigation }) {
       console.log(e);
     }
   };
+//checking if the video is there or not 
+  if(introClip===undefined){
+   console.log('undefined')
+
+   
+  }else{
+     console.log('available')
+ 
+  }
+
+//  console.log('testing',empty)
 
   return (
       <>
        <ImageBackground source={background} style={globalStyles.backgroundImg}>
            {/* The video view */}
            {
-            isLoading? <LoadingSpinner/> :  introVid.length <=0 ?(
+            isLoading ? <LoadingSpinner/> : introClip === undefined || introClip.length<=0 ? 
+            <View style ={{marginTop:70, padding:20, textAlign:"center"}}> 
+            <Text style={{
+              textAlign: "center",
+              fontSize: 20,
+              fontWeight: "bold",
+              marginTop: 20
+            }}>Your 30 sec introduction video will appear here</Text>
+              <Text style={{marginHorizontal:5, alignSelf:"center"}}>You can upload a video by using the button below</Text>
+              
+
+               
+
+
+          </View>
+            
+            : <View style={{marginTop:70}}>
+            < Video 
+             
+            style={styles.videoPlaye}
+              ref={video}
+              source={{ uri: `${introClip}` }}
+              useNativeControls
+              resizeMode="contain"
+              
+
+            />
+
+
+
+
+          </View>
+           }
+
+
+
+           {/* {
+            isLoading? <LoadingSpinner/> :  introClip.length <=0 || introClip === 'undefined' ?(
               <View style ={{marginTop:70, padding:20, textAlign:"center"}}> 
               <Text style={{
                 textAlign: "center",
@@ -351,7 +494,7 @@ export default function UserProfile({ route, navigation }) {
               <View style={{marginTop:70}}>
               <Video style={styles.videoPlaye}
                 ref={video}
-                source={{ uri: `${introVid}` }}
+                source={{ uri: `${introClip}` }}
                 useNativeControls
                 resizeMode="contain"
   
@@ -363,7 +506,7 @@ export default function UserProfile({ route, navigation }) {
   
             </View>
             )
-           }
+           } */}
 
            {
            
@@ -400,7 +543,7 @@ export default function UserProfile({ route, navigation }) {
                {/* Bio view */}
           <View style={{ display: 'flex', flexDirection: "row", justifyContent: 'center', alignSelf: 'center' }}>
             <View>
-              <Text style={{ padding: 10, width: 200 }}>{description}
+              <Text style={{ padding: 10, width: 200 }}>{bio}
               </Text>
             </View>
           </View>
@@ -412,8 +555,12 @@ export default function UserProfile({ route, navigation }) {
          <View></View>
         {/*The end of buttons View */}
         
+          
           <View>
-            <Modal visible={modalOpen}>
+
+            <Modal visible={modalOpen}
+            >
+              <ScrollView>
               <View style={styles.modalContainer}>
                 <View style={styles.closeBtnContaainer}>
                   <EvilIcons
@@ -422,20 +569,33 @@ export default function UserProfile({ route, navigation }) {
                     size={35}
                     color="white"
                   />
+
+                
                 </View>
 
                 <View style={styles.editprofileImgContainer}>
-                  <Image
+                  {
+                    imageUri ?  <Image
+                   
                     source={{ uri: `${imageUri}` }}
                     style={styles.uploadedImage}
-                  />
+                      resizeMode='cover'
+
+                  /> : <Image
+                   
+                  source={{ uri: `${placeHolderImage} `}}
+                  style={styles.uploadedImage}
+                  resizeMode='contain'
+                /> 
+                  }
+                 
                   {!submit ? (
                     <AntDesign
                       onPress={() => openImageLibrary()}
-                      style={styles.imgAddIcon}
+                      style={styles.imgAddIcon}   
                       name="pluscircle"
                       size={35}
-                      color="#E3E3E3"
+                      color="black"
                     />
                   ) : (
                     <ActivityIndicator
@@ -453,23 +613,32 @@ export default function UserProfile({ route, navigation }) {
                   onChangeText={(artistName) => setUserName(artistName)}
                   style={styles.editUserInput}
                 />
+           
                 <TextInput
+                 multiline={true}
+                 numberOfLines={5}
+                 textAlignVertical = "top"
                   placeholder="Bio"
                   placeholderTextColor="gray"
-                  value={`${description}`}
-                  onChangeText={(description) => setDescription(description)}
-                  style={styles.editUserInput}
+                  value={`${bio}`}
+                  onChangeText={(bio) => setBio(bio)}
+                  style={styles.editUserInputBio}
                 />
                 <TouchableOpacity style={styles.updateBtn} onPress={updateUser}>
                   <Text style={styles.modalText}>Update</Text>
                 </TouchableOpacity>
               </View>
+              </ScrollView>
             </Modal>
+            
+
+           
 
 
 
 
           </View>
+        
 
 
 
@@ -839,7 +1008,7 @@ const styles = StyleSheet.create({
 
   modalContainer: {
     width: "85%",
-    height: 520,
+    height: 550,
     backgroundColor: "#E3E3E3",
     borderRadius: 15,
     alignSelf: "center",
@@ -848,26 +1017,31 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
   },
 
-  editprofileImgContainer: {
-    width: 200,
-    height: 200,
-     borderRadius: 150,
-    backgroundColor: "gray",
-    justifyContent: "center",
-    alignItems: "center",
-  },
+  
 
   editUserInput: {
     borderColor: "black",
     borderWidth: 1,
     height: 50,
-    paddingHorizontal: 65,
+    paddingHorizontal: 12,
     borderRadius: 15,
     marginVertical: 20,
     backgroundColor: "white",
     color: "#000",
     width:250
   },
+  editUserInputBio: {
+    borderColor: "black",
+    borderWidth: 1,
+    width:250,
+    backgroundColor: "white",
+    borderRadius: 15,
+    paddingHorizontal: 12,
+    padding:5
+    
+  },
+
+
 
   updateBtn: {
     width: 220,
@@ -876,6 +1050,7 @@ const styles = StyleSheet.create({
      borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
+    marginTop:20
   },
 
   modalText: {
@@ -894,13 +1069,27 @@ const styles = StyleSheet.create({
     right: 15,
   },
 
+  editprofileImgContainer: {
+    width: 200,
+    height: 200,
+     borderRadius: 150,
+    backgroundColor: "gray",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
   uploadedImage: {
     width: 200,
     height: 200,
-     borderRadius: 100,
+   borderRadius: 150,
+    
+    
   },
   imgAddIcon: {
     position: "absolute",
+  
+   right:15,
+   bottom:0,
   },
 
   flatlist: {

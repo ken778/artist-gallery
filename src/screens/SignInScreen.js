@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import {
   StyleSheet,
   TextInput,
@@ -20,7 +20,10 @@ import { auth, firestore } from "../../Firebase";
 export default function SignInScreen({ navigation }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);`/11`
+  const [varified, setVarified] = useState(true)
+
+   const [isVarified, setisVarified] = useState(Boolean)
 
   // form validation
   const validate = () => {
@@ -37,12 +40,14 @@ export default function SignInScreen({ navigation }) {
       // );
       Alert.alert(
         "Login Failed",
-        "Your email or password is incorrect. Please Try again",
+        "Email and Password cannot be empty",
         [
          
           { text: "OK", onPress: () => console.log("OK Pressed") }
         ]
       );
+         setLoading(false);
+
       console.log('fields are empty')
     } else if (email == "") {
       // Toast.show("Email cannot be empty", Toast.LONG, Toast.CENTER);
@@ -71,18 +76,18 @@ export default function SignInScreen({ navigation }) {
       Alert.alert(
         "Login Failed",
         "Email is not valid",
-        [
+        [ 
          
           { text: "OK", onPress: () => console.log("OK Pressed") }
         ]
       );
       setLoading(false);
-    } else if (!strongRegex.test(password)) {
+    } else if (password == "") {
       // Toast.show("Password is not valid", Toast.LONG, Toast.CENTER);
       Alert.alert(
         "Login Failed",
-        "Password is not valid",
-        [
+        "Password is not vali",
+        [ 
          
           { text: "OK" }
         ]
@@ -93,21 +98,69 @@ export default function SignInScreen({ navigation }) {
     }
   };
 
+
+ //checking if email is varified
+  const checkEmail = () =>{
+    auth.onAuthStateChanged((user)=>{
+        // console.log('checking email',user.emailVerified)
+        // setisVarified(user.emailVerified)
+        console.log('in the signIn', user)
+        if(user){
+          console.log('there is no user')
+          setisVarified(user.emailVerified)
+
+        }else{ 
+          setisVarified(false)
+        }
+    })
+
+  }
+
+
+  //use effect
+  useEffect(()=>{
+    checkEmail()
+    console.log('i am running now')
+    
+    //checking email varification state
+    auth.onAuthStateChanged((userCredential) => {
+      console.log('checking varification in useEffect')
+     
+    })
+    console.log(varified)
+
+},[])
+
   const signIn = async () => {
-    if (email !== "" && password !== "") {
+
+    if (email !== "" && password !== "" ) {
       await auth
         .signInWithEmailAndPassword(email, password)
         .then((user) => {
           <ActivityIndicator size="large" color="#0000ff" />;
-          console.log(user);
+          console.log('loged in user',user);
+
+          //Changing login state
+          //setisVarified(true)
+
+
+
           // Toast.show(
           //   "You have successfully loged in ",
           //   Toast.LONG,
           //   Toast.CENTER
           // );
-          if (user) {
-            navigation.replace("LandingPage");
-          }
+          //navigation.replace('Sales');
+         // navigation.replace("LandingPage");
+         // navigation.replace('Products', { fromScreen: 'LandingPage' });
+         
+         
+          navigation.navigate("LandingPage");
+        
+           
+         
+        
+         
         })
         .catch((error) => {
           console.log(error);
@@ -119,7 +172,23 @@ export default function SignInScreen({ navigation }) {
             setLoading(false);
           } else if (error.code === "auth/wrong-password") {
             // Toast.show("Your Password is Incorrect", Toast.LONG, Toast.CENTER);
-          } else {
+            Alert.alert(
+              "Failed",
+              "Your Password is Incorrect",
+              [
+                {text:"OK"}
+              ]
+            )
+            console.log('Your Password is Incorrect')
+          } if (error.code === "auth/user-not-found") {
+            Alert.alert(
+             "Failed",
+             "Couldn’t find an account matching the email and password you entered.\n\nPlease check your email and password and try again.",
+             [
+               {text:"OK"}
+             ]
+           )
+         }else {
             console.log(error.code, " this the error you should catch");
             // Toast.show(
             //   "Please check your email id or password",
@@ -129,6 +198,9 @@ export default function SignInScreen({ navigation }) {
             setLoading(false);
           }
         });
+    }else
+    {
+      console.log('something is wrong')
     }
   };
 
@@ -208,6 +280,14 @@ export default function SignInScreen({ navigation }) {
             <Text style={{ color: "#ffffff" }}> Sign Up</Text>
           </TouchableOpacity>
         </View>
+
+
+           <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")}>
+             <View style={{ flexDirection: "row", alignSelf: "center", marginTop:10 }}>
+              <Text style={{color:"#ffffff"}}>Forgot Password?</Text>
+             </View>
+            </TouchableOpacity>
+
       </View>
     </KeyboardAvoidingView>
   );

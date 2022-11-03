@@ -25,8 +25,9 @@ export default function SignUpScreen({ navigation }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-
-
+  const [video,setVideo] = useState('');
+  const [bio,setBio] = useState('');
+  
   // form validation
   const validate = () => {
     setLoading(!loading);
@@ -42,16 +43,18 @@ export default function SignUpScreen({ navigation }) {
       // );
 
       Alert.alert(
-        " Failed",
+        "Failed",
         "Email and Password cannot be empty",
         [
           {text:"OK"}
         ]
       )
+         setLoading(false);
+
     } else if (email == "") {
       // Toast.show("Email cannot be empty", Toast.LONG, Toast.CENTER);
       Alert.alert(
-        " Failed",
+        "Failed",
         "Email cannot be empty",
         [
           {text:"OK"}
@@ -61,7 +64,7 @@ export default function SignUpScreen({ navigation }) {
     } else if (password == "") {
       // Toast.show("Password cannot be empty", Toast.LONG, Toast.CENTER);
       Alert.alert(
-        " Failed",
+        "Failed",
         "Password cannot be empty",
         [
           {text:"OK"}
@@ -71,8 +74,8 @@ export default function SignUpScreen({ navigation }) {
     } else if (artistName == "") {
       //Toast.show("Your artist name cannot be empty", Toast.LONG, Toast.CENTER);
       Alert.alert(
-        " Failed",
-        "Your artist name cannot be empty",
+        "Failed",
+        "Name cannot be empty",
         [
           {text:"OK"}
         ]
@@ -88,71 +91,106 @@ export default function SignUpScreen({ navigation }) {
         ]
       )
       setLoading(false);
-    } else if (pattern.test(artistName)) {
-      // Toast.show("Name is not valid", Toast.LONG, Toast.CENTER);
-      Alert.alert(
-        " Failed",
-        "Name is not valid",
-        [
-          {text:"OK"}
-        ]
-      )
-      setLoading(false);
-    } else if (!strongRegex.test(password)) {
-      // Toast.show("Password is not valid", Toast.LONG, Toast.CENTER);
-      console.log('Your password needs to:\n\n -be at least 8 characters long.\n\n -at least one letter and one number')
-      Alert.alert(
-        "Failed",
-        "Your password needs to:\n\n  -include both lower and upper case characters. \n\n  -include at least one number or symbol.\n\n -be at least 8 characters long.",
-        [
-          {text:"OK"}
-        ]
-      )
-      setLoading(false);
-    } else {
-      onSignup();
+    }else {
+      onSubmit();
     }
   };
 
+
+   const onSubmit = () =>{
+    if (artistName !== "" && email !== "" && password !== "") {
+      auth
+      .createUserWithEmailAndPassword(email, password).then((userCredential)=>{
+        console.log('registered')
+        
+      })
+    }
+   }
   const onSignup = () => {
     if (artistName !== "" && email !== "" && password !== "") {
       auth
         .createUserWithEmailAndPassword(email, password)
-        .then((userCredential) => {
-          //  navigation.navigate("SignIn");
+        .then((userCredential) => { 
+          console.log('registered')
+          // navigation.replace('SignIn');
           const artist = userCredential.user;
-          firestore
-            .collection("artists")
-            // .doc(artist.uid)
-            // .set({
-            //   timeStamp: new Date().toISOString(),
-            //   artistUid: artist.uid,
-            //   artistName: artistName,
-            //   email: artist.email,
-            //   photoUrl:
-            //     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTqjYWb_kZ7jZ_aCJJdFjLqxS-DBaGsJGxopg&usqp=CAU",
-            // })
-            // .then(() => {
-            //   // Toast.show(
-            //   //   "You have successfully registered ",
-            //   //   Toast.LONG,
-            //   //   Toast.CENTER
-            //   // );
-            //   navigation.navigate("SignIn");
-            // })
-            // .catch((error) =>
-            //   //  Toast.show(`${error}`, Toast.LONG, Toast.CENTER)
-            //   {}
-            // );
-          // console.log('User account created & signed in!');
+          artist.sendEmailVerification().then(()=>{
+           console.log('email sent')
+           //logout
+        //  auth.signOut()
+        .then(() => {
+          // Toast.show("You have signed out!", Toast.LONG, Toast.CENTER);
+
+         console.log('signed out')
+        
+          
         })
+        .catch((error) => alert(error));
+   
+
+           navigation.navigate("Onboarding");
+             Alert.alert(
+             "Verify Your Email",
+             "Please check your email for a varification link to activate your account",
+             [
+                 {text:"OK",  onPress: () =>{navigation.navigate('Onboarding')}}
+              ]
+            )
+
+          }).catch((error)=>{
+           console.log(error.message)     
+          })
+
+           //adding data to firebase
+           firestore
+           .collection("artists")
+           .doc(artist.uid)
+           .set({
+             timeStamp: new Date().toISOString(),
+             artistUid: artist.uid,
+             artistName: artistName,
+             introClip:video,
+             bio:bio,
+             email: artist.email,
+             photoUrl:
+               "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTqjYWb_kZ7jZ_aCJJdFjLqxS-DBaGsJGxopg&usqp=CAU",
+           })
+           .then(() => {
+             // Toast.show(
+             //   "You have successfully registered ",
+             //   Toast.LONG,
+             //   Toast.CENTER
+             // );
+             //navigation.navigate("SignIn");
+             console.log('data sent to firebase')
+           })
+           .catch((error) =>{
+             //  Toast.show(`${error}`, Toast.LONG, Toast.CENTER)\
+             console.log('something went wrong')
+             console.log(error.message)
+
+
+            
+       })  
+         
+       
+
+         //save data
+
+
+
+          console.log('User account created & signed in!');
+        }) 
         .catch((error) => {
           if (error.code === "auth/email-already-in-use") {
-            // Toast.show(
-            //   "That email address is already in use!",
-            //   Toast.LONG,
-            //   Toast.CENTER
-            // );
+            Alert.alert(
+              "Failed",
+              "An account  using this email already exists",
+              [
+                {text:"OK"}
+              ]
+            )  
+
           }
           if (error.code === "auth/invalid-email") {
             // Toast.show(
@@ -161,20 +199,56 @@ export default function SignUpScreen({ navigation }) {
             //   Toast.CENTER
             // );
           }
+          if(error.code === "auth/network-request-failed"){
+            console.log('check your netwaok')   
+            Alert.alert(
+              "Failed",
+              "A network error has occured, check your internet connection.",
+              [
+                {text:"OK"}
+              ]
+            ) 
+                  
+          }
+          if(error.code === "auth/weak-password"){
+            console.log('check your netwaok')   
+            Alert.alert(
+              "Failed",
+              "Password should be at least 6 characters",
+              [
+                {text:"OK"}
+              ]
+            ) 
+                  
+          }
+
+          if (error.code === "auth/user-not-found") {
+             Alert.alert(
+              " Failed",
+              "There is no user record corresponding to this Email",
+              [
+                {text:"OK"}
+              ]
+            )
+          }
           console.error(error);
         });
     }
   };
+
+
+
   return (
     <>
-      <KeyboardAvoidingView
-        behavior="position"
-        style={{
+     
+
+        <ScrollView    style={{
           flex: 1,
           backgroundColor: "#573E22",
-        }}
-      >
-        <View style={styles.topBody}>
+        }}>
+           
+
+           <View style={styles.topBody}>
           <View>
             <Image
               source={require("../assets/logo/SignUpLogo.png")}
@@ -188,6 +262,7 @@ export default function SignUpScreen({ navigation }) {
             <Text style={{ color: "#FFFFFF" }}>Create your new account</Text>
           </View>
           <View>
+           
             <View style={styles.SectionStyle}>
               <TextInput
                 style={styles.inputStyle}
@@ -263,6 +338,7 @@ export default function SignUpScreen({ navigation }) {
             )}
               </LinearGradient>
             </TouchableOpacity>
+           
             <View style={{ flexDirection: "row", alignSelf: "center" }}>
               {/* <Text style={{marginHorizontal: 65}}>
               Already have an account?
@@ -282,7 +358,11 @@ export default function SignUpScreen({ navigation }) {
             </View>
           </View>
         </View>
-      </KeyboardAvoidingView>
+        </ScrollView>
+
+        
+     
+     
     </>
   );
 }

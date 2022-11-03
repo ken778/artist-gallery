@@ -13,6 +13,7 @@ import {
   TextInput,
   Alert,
   ActivityIndicator,
+  KeyboardAvoidingView,
 } from "react-native";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
@@ -155,196 +156,221 @@ export default function ProductModal({ navigation, isVisible, onClose }) {
   });
 
   return (
-    <View>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(!modalVisible);
-        }}
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <View style={{ left: 135, bottom: 25 }}>
-              <AntDesign
-                name="closecircleo"
-                size={24}
-                color="#ceb89e"
-                onPress={() => setModalVisible(false)}
-              />
-            </View>
+    <>
+   
+        <View>
+     <KeyboardAvoidingView behavior="height">
+     <Modal
+       animationType="slide"
+       transparent={true}
+       visible={modalVisible}
+       onRequestClose={() => {
+         setModalVisible(!modalVisible);
+       }}
+     >
+      <ScrollView>
+      <View style={styles.centeredView}>
+         <View style={styles.modalView}>
+           <View style={{ left: 135, bottom: 25 }}>
+             <AntDesign
+               name="closecircleo"
+               size={24}
+               color="#ceb89e"
+               onPress={() => setModalVisible(false)}
+             />
+           </View>
 
-            <Text
-              style={{
-                textAlign: "center",
-                color: "#ceb89e",
-                fontSize: 25,
-                bottom: 55,
-              }}
-            >
-              Upload Your Art
-            </Text>
+           <Text
+             style={{
+               textAlign: "center",
+               color: "#ceb89e",
+               fontSize: 25,
+               bottom: 55,
+             }}
+           >
+             Upload Your Art
+           </Text>
 
-            <View style={{ bottom: 45 }}>
-              <TouchableOpacity>
-                {imageUri == "" ? (
-                  <>
-                    <Image source={placeholder} style={styles.image} />
-                  </>
-                ) : (
-                  <>
-                    <Image source={{ uri: imageUri }} style={styles.image} />
-                  </>
-                )}
-                {!submit ? (
-                  <MaterialIcons
-                    onPress={() => openImageLibrary()}
-                    name="camera"
-                    size={24}
-                    color="#ceb89e"
-                    style={{ marginLeft: 80, marginTop: -25 }}
-                  />
-                ) : (
-                  <ActivityIndicator
-                    style={{
-                      alignSelf: "center",
-                      position: "absolute",
-                      marginVertical: 50,
-                    }}
-                    color="black"
-                    size="small"
-                  />
-                )}
-              </TouchableOpacity>
-            </View>
+           <View style={{ bottom: 45 }}>
+             <TouchableOpacity>
+               {imageUri == "" ? (
+                 <>
+                   <Image source={placeholder} style={styles.image} />
+                 </>
+               ) : (
+                 <>
+                   <Image source={{ uri: imageUri }} style={styles.image} />
+                 </>
+               )}
+               {!submit ? (
+                 <MaterialIcons
+                   onPress={() => openImageLibrary()}
+                   name="camera"
+                   size={24}
+                   color="#ceb89e"
+                   style={{ marginLeft: 80, marginTop: -25 }}
+                 />
+               ) : (
+                 <ActivityIndicator
+                   style={{
+                     alignSelf: "center",
+                     position: "absolute",
+                     marginVertical: 50,
+                   }}
+                   color="black"
+                   size="small"
+                 />
+               )}
+             </TouchableOpacity>
+           </View>
 
-            <ScrollView style={{ bottom: 30 }}>
-              <View style={styles.TextField}>
-                <View style={{ flexDirection: "row", marginHorizontal: 3 }}>
-                  <Text
-                    style={{
-                      flexDirection: "row",
-                      color: "#ceb89e",
-                      marginHorizontal: 10,
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Art Type:
-                  </Text>
-                </View>
+           
+             <View style={styles.TextField}>
+               <View style={{ flexDirection: "row", marginHorizontal: 3 }}>
+                 <Text
+                   style={{
+                     flexDirection: "row",
+                     color: "#ceb89e",
+                     marginHorizontal: 10,
+                     fontWeight: "bold",
+                   }}
+                 >
+                   Art Type:
+                 </Text>
+               </View>
 
-                <TextInput
-                  style={styles.input}
-                  onChangeText={(artType) => setArtType(artType)}
-                  //value={name}
-                  placeholder="Enter Art Type"
-                />
-              </View>
+               <TextInput
+                 style={styles.input}
+                 multiline={true}
+                 numberOfLines={2}
+                 textAlignVertical = "top"
+                 onChangeText={(artType) => setArtType(artType)}
+                 //value={name}
+                 placeholder="Enter Art Type"
+               />
+             </View>
 
-              <View style={styles.TextField}>
-                <View
-                  style={{
-                    flex: 1,
-                    flexDirection: "row",
-                    marginHorizontal: 3,
-                  }}
-                >
-                  <Text
-                    style={{
-                      flex: 1,
-                      flexDirection: "row",
-                      color: "#ceb89e",
-                      marginHorizontal: 10,
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Art Name:
-                  </Text>
-                </View>
+             <View style={styles.TextField}>
+               <View
+                 style={{
+                   flex: 1,
+                   flexDirection: "row",
+                   marginHorizontal: 3,
+                 }}
+               >
+                 <Text
+                   style={{
+                     flex: 1,
+                     flexDirection: "row",
+                     color: "#ceb89e",
+                     marginHorizontal: 10,
+                     fontWeight: "bold",
+                   }}
+                 >
+                   Art Name:
+                 </Text>
+               </View>
 
-                <TextInput
-                  style={styles.input}
-                  onChangeText={(artName) => setArtName(artName)}
-                  //value={name}
-                  placeholder="Enter Art Name"
-                />
-              </View>
+               <TextInput
+                 style={styles.input}
+                 onChangeText={(artName) => setArtName(artName)}
+                 //value={name}
+                 placeholder="Enter Art Name"
+               />
+             </View>
 
-              <View style={styles.TextField}>
-                <View style={{ flexDirection: "row", marginHorizontal: 3 }}>
-                  <Text
-                    style={{
-                      flexDirection: "row",
-                      color: "#ceb89e",
-                      marginHorizontal: 10,
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Price:
-                  </Text>
-                </View>
+             <View style={styles.TextField}>
+               <View style={{ flexDirection: "row", marginHorizontal: 3 }}>
+                 <Text
+                   style={{
+                     flexDirection: "row",
+                     color: "#ceb89e",
+                     marginHorizontal: 10,
+                     fontWeight: "bold",
+                   }}
+                 >
+                   Price:
+                 </Text>
+               </View>
 
-                <TextInput
-                  style={styles.input}
-                  onChangeText={(artPrice) => setArtPrice(artPrice)}
-                  //value={price}
-                  keyboardType="phone-pad"
-                  placeholder="Enter Art Price"
-                />
-              </View>
+               <TextInput
+                 style={styles.input}
+                 onChangeText={(artPrice) => setArtPrice(artPrice)}
+                 //value={price}
+                 keyboardType="phone-pad"
+                 placeholder="Enter Art Price"
+               />
+             </View>
 
-              <View style={styles.TextField}>
-                <View style={{ flexDirection: "row", marginHorizontal: 3 }}>
-                  <Text
-                    style={{
-                      flexDirection: "row",
-                      color: "#ceb89e",
-                      marginHorizontal: 10,
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Description:
-                  </Text>
-                </View>
+             <View style={styles.TextField}>
+               <View style={{ flexDirection: "row", marginHorizontal: 3 }}>
+                 <Text
+                   style={{
+                     flexDirection: "row",
+                     color: "#ceb89e",
+                     marginHorizontal: 10,
+                     fontWeight: "bold",
+                     marginTop: 14,
+                   }}
+                 >
+                   Description:
+                 </Text>
+               </View>
 
-                <TextInput
-                  style={styles.input}
-                  onChangeText={(description) => setDescription(description)}
-                  //value={price}
-                  placeholder="Enter Art Description"
-                />
-              </View>
-              <View style={styles.TextField}>
-                <View style={{ flexDirection: "row", marginHorizontal: 3 }}>
-                  <Text
-                    style={{
-                      flexDirection: "row",
-                      color: "#ceb89e",
-                      marginHorizontal: 10,
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Art Size:{" "}
-                  </Text>
-                </View>
+               <TextInput
+                 style={styles.input}
+                 multiline={true}
+                 numberOfLines={3}
+                 textAlignVertical = "top"
+                 onChangeText={(description) => setDescription(description)}
+                 //value={price}
+                 placeholder="Enter Art Description"
+               />
+             </View>
+            
+             <View style={styles.TextField}>
+               <View style={{ flexDirection: "row", marginHorizontal: 3 }}>
+                 <Text
+                   style={{
+                     flexDirection: "row",
+                     color: "#ceb89e",
+                     marginHorizontal: 10,
+                     fontWeight: "bold",
+                   }}
+                 >
+                   Art Size:{" "}
+                 </Text>
+               </View>
 
-                <TextInput
-                  style={styles.input}
-                  onChangeText={(artSize) => setArtSize(artSize)}
-                  //value={price}
-                  placeholder="Enter Art Size"
-                />
-              </View>
-            </ScrollView>
+               <TextInput
+                 style={styles.input}
+                 onChangeText={(artSize) => setArtSize(artSize)}
+                 //value={price}
+                 placeholder="Enter Art Size"
+               />
+             </View>
+            
+           
+           
 
-            <TouchableOpacity style={styles.button} onPress={validateProducts}>
-              <Text style={styles.textStyle}>Add</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-    </View>
+           <TouchableOpacity style={styles.button} onPress={validateProducts}>
+             <Text style={styles.textStyle}>Add</Text>
+           </TouchableOpacity>
+         </View>
+       </View>
+      </ScrollView>
+    
+      
+     </Modal>
+     </KeyboardAvoidingView>
+     
+  
+     
+     </View>
+ 
+    
+    </>
+   
   );
 }
 
@@ -398,7 +424,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 35,
     width: "90%",
-    height: 670,
+    height: 790,
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: {
@@ -416,7 +442,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 40,
     justifyContent: "center",
-    marginVertical: -25,
+    marginTop:8,
     //borderWidth: 1
   },
   buttonOpen: {
@@ -452,9 +478,9 @@ const styles = StyleSheet.create({
     borderColor: "#ceb89e",
   },
   input: {
-    height: 40,
+ 
     margin: 12,
-    padding: 10,
+   
     color: "#ceb89e",
   },
   image: {

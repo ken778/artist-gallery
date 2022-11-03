@@ -31,14 +31,15 @@ import { TabNavigator2 } from "./src/screens/HomeScreen";
 import HomeScreen from "./src/screens/HomeScreen";
 import EditProfile from "./src/screens/EditProfile";
 import UploadedArt from "./src/screens/UploadedArt";
-import Sold from "./src/screens/Sold";
+import Sold from "./src/screens/Sold";      
+import ForgotPassword from "./src/screens/ForgotPassword";
 
 
 
 const Stack = createNativeStackNavigator();
 const Tab = createMaterialTopTabNavigator();
 
-const TabNavigator = () => {
+const TabNavigator = ({navigation}) => {
   return (
     <Tab.Navigator
       tabBarOptions={{
@@ -90,6 +91,8 @@ export default function App({ navigation, route }) {
   const [videoUrl, setVideoUrl] = useState("");
   const [description, setDescription] = useState("");
 
+  const [isVarified, setisVarified] = useState(Boolean)
+
 
   // toast message
   // const toastConfig = {
@@ -128,11 +131,38 @@ export default function App({ navigation, route }) {
   //   ),
   // };
 
+  //checking if email is varified
+  const checkEmail = () =>{
+    auth.onAuthStateChanged((user)=>{
+       // console.log('checking email',user.emailVerified)
+        
+        //added recently
+        if(user!=null){
+          setisVarified(user.emailVerified)
+        }
+      
+        console.log(user)
+
+
+        // if(isVarified ==true){
+        //         navigation.navigate('SignUp')
+        // }else{
+        //   navigation.navigate('SignUp')
+        // }
+    })
+
+  }
+   console.log('varified:',isVarified)
+ 
+
+
   useEffect(() => {
+    checkEmail()
     const unregister = auth.onAuthStateChanged((userExist) => {
       // const artistUid = auth()?.currentUser?.uid;
       if (userExist) {
         setArtist(userExist);
+        
         firestore
           .collection("artists")
           .where("artistUid", "==", userExist.uid)
@@ -177,10 +207,10 @@ export default function App({ navigation, route }) {
             color: "#000",
           },
         }}
-      >
-        {artist ? (
-          <>  
-             {/* te */}
+      >  
+      
+         
+             {/* te */} 
             <Stack.Screen
               name="LandingPage"
               component={TabNavigator}
@@ -235,6 +265,13 @@ export default function App({ navigation, route }) {
                 ),
               })}
             />
+            
+              <Stack.Screen
+              options={{ headerShown: false }}
+              name="ForgotPassword"
+              component={ForgotPassword}
+            />
+
             
             <Stack.Screen
                  options={{ headerShown: true, headerTransparent: true }}
@@ -332,9 +369,9 @@ export default function App({ navigation, route }) {
               })}
               component={TabNavigator2}
             />
-          </>
-        ) : (
-          <>
+       
+      
+    
             <Stack.Screen
               options={{ headerShown: false }}
               name="SignIn"
@@ -355,8 +392,8 @@ export default function App({ navigation, route }) {
               name="SignUp"
               component={SignUpScreen}
             />
-          </>
-        )}
+     
+      
         <Stack.Screen
           options={{ headerShown: false }}
           name="Splash"
