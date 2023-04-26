@@ -1,14 +1,18 @@
 import React, { useEffect } from 'react';
-import { Text, View,ImageBackground, StyleSheet,  Image} from 'react-native';
+import { Text, View,ImageBackground, StyleSheet,  Image,Modal, Pressable} from 'react-native';
 import { globalStyles } from "../assets/styles/GlobalStyles";
 import { FlatGrid } from 'react-native-super-grid';
 import { useState } from 'react';
 import { auth, firestore, storageRef } from "../../Firebase";
+import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 
 
 const background = require("../assets/images/home.png");
 
 const UploadedArt = () => {
+
+  const [modalVisible1, setModalVisible1] = useState(false);
+  const [clickedImage, setClickedImage] = useState('')
 
    const [artist, setArtist] = useState([]);
    const [items, setItems] = useState([{ name: 'Mens Treat', code: '#1abc9c'},
@@ -51,6 +55,12 @@ const getArtUrl = () => {
 
  };
 
+ //getiing clicked item
+ const getClickedItem = (item) =>{
+    console.log('clicked', item)
+    setClickedImage(item.artUrl)
+ }
+
 
 useEffect(()=>{
 
@@ -63,6 +73,45 @@ useEffect(()=>{
 
    
     return (
+      <>
+     <View style={styles.centeredView}>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible1}
+        onRequestClose={() => {
+          Alert.alert('Modal has been closed.');
+          setModalVisible1(!modalVisible1);
+        }}>
+        <View style={styles.centeredView}>
+        
+          <View style={styles.modalView}>
+            <View>
+            <Text style={styles.closeButton} > <AntDesign
+               name="closecircleo"
+               size={24}
+               color="#ceb89e"
+               onPress={() => setModalVisible1(false)}
+             /></Text>
+            </View>
+          
+                <View style={{width:'100%', backgroundColor:'orange'}}>
+               
+                  <Image
+                    style={styles.modalImage}
+                    source={{
+                    uri:clickedImage
+                  }}
+                  />
+                </View>
+
+           
+          </View>
+        </View>
+      </Modal>
+     
+    </View>
+      
        
           <ImageBackground source={background} style={globalStyles.backgroundImg}>
             <View style={styles.mainCont}></View>
@@ -86,17 +135,20 @@ useEffect(()=>{
               // fixed
               spacing={20}
               renderItem={({ item }) => (
-                <View style={[styles.box]}>
+                <Pressable   onPress={() =>{ getClickedItem(item), setModalVisible1(true)}}>
+                     <View style={[styles.box]}>
                 
-                 <View  style={[styles.image]}>
-                     <Image source={{ uri: item.artUrl  }}  style={[styles.image]} /> 
-                 </View>
-                 <View style={{backgroundColor:"#E3E3E3",borderBottomEndRadius:15,borderBottomLeftRadius:15}}>
-                     <Text style={{padding:10}} >{item.artType}</Text>
-                 </View>
-                  
-                 
+                <View  style={[styles.image]}>
+                    <Image source={{ uri: item.artUrl  }}  style={[styles.image]} /> 
                 </View>
+                <View style={{backgroundColor:"#E3E3E3",borderBottomEndRadius:15,borderBottomLeftRadius:15}}>
+                    <Text style={{padding:10}} >{item.artType}</Text>
+                </View>
+                 
+                
+               </View>
+                </Pressable>
+               
               )}
             />
 
@@ -107,7 +159,7 @@ useEffect(()=>{
              
           </ImageBackground>
  
-      
+      </>
     );
 }
 
@@ -206,6 +258,32 @@ const styles = StyleSheet.create({
       borderWidth: 0.001,
       borderColor:"#E3E3E3",
       borderRadius:15
+    },
+      
+    modalView: {
+  
+      marginTop: '20%',
+       height:200,
+      borderRadius: 20,
+     
+    
+      shadowColor: '#000',
+   
+     
+      
+    },
+    modalImage:{
+      width:'100%',
+      height: 300,
+      // aspectRatio: 1.1,
+      resizeMode:'stretch',
+      alignSelf:'center'
+
+    },
+    closeButton:{
+      alignSelf:'flex-end',
+       marginRight:10
     }
+    
  });
 export default UploadedArt;

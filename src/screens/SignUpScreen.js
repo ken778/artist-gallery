@@ -92,20 +92,145 @@ export default function SignUpScreen({ navigation }) {
       )
       setLoading(false);
     }else {
-      onSubmit();
+      onSignup();
     }
   };
 
 
-   const onSubmit = () =>{
+  //signout
+  const signoutUser = async () => {
+    try {
+      await auth
+        .signOut()
+        .then(() => {
+          // Toast.show("You have signed out!", Toast.LONG, Toast.CENTER);
+
+           navigation.replace("Onboarding");
+          
+        })
+        .catch((error) => alert(error));
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+
+  const onSubmit = () => {
     if (artistName !== "" && email !== "" && password !== "") {
       auth
-      .createUserWithEmailAndPassword(email, password).then((userCredential)=>{
-        console.log('registered')
+        .createUserWithEmailAndPassword(email, password).then((userCredential) => {
+          const artist = userCredential.user;
+          console.log('registered')
+         
+
+          //adding data to firebase
+          firestore
+            .collection("artists")
+            .doc(artist.uid)
+            .set({
+              timeStamp: new Date().toISOString(),
+              artistUid: artist.uid,
+              artistName: artistName,
+              introClip: video,
+              bio: bio,
+              email: artist.email,
+              photoUrl:
+                "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTqjYWb_kZ7jZ_aCJJdFjLqxS-DBaGsJGxopg&usqp=CAU",
+            })
+            .then(() => {
+              // Toast.show(
+              //   "You have successfully registered ",
+              //   Toast.LONG,
+              //   Toast.CENTER
+              // );
+              //navigation.navigate("SignIn");
+              console.log('data sent to firebase')
+              alert('data sent to firebase')
+              auth.signOut().then(()=>{
+                alert('ran signout')
+              })
+             
+            })
+            .catch((error) => {
+              //  Toast.show(`${error}`, Toast.LONG, Toast.CENTER)\
+              console.log('something went wrong')
+              console.log(error.message)
+              alert(error.message)
+      
+
+
+            })//end of storing data function
+
+          //email varification
         
-      })
+          artist.sendEmailVerification().then(() => {
+            Alert.alert(
+              "Verify Your Email",
+              "Please check your email for a varification link to activate your account",
+              [
+                { text: "OK", onPress: () => { navigation.navigate('Onboarding') } }
+              ]
+            )
+            
+          })//end of varification  
+        
+
+
+
+        }).catch((error) => {//start of register catch
+          if (error.code === "auth/email-already-in-use") {
+            Alert.alert(
+              "Failed",
+              "An account  using this email already exists",
+              [
+                { text: "OK" }
+              ]
+            )
+
+          }
+          if (error.code === "auth/invalid-email") {
+            // Toast.show(
+            //   "That email address is invalid!",
+            //   Toast.LONG,
+            //   Toast.CENTER
+            // );
+          }
+          if (error.code === "auth/network-request-failed") {
+            console.log('check your netwaok')
+            Alert.alert(
+              "Failed",
+              "A network error has occured, check your internet connection.",
+              [
+                { text: "OK" }
+              ]
+            )
+
+          }
+          if (error.code === "auth/weak-password") {
+            console.log('check your netwaok')
+            Alert.alert(
+              "Failed",
+              "Password should be at least 6 characters",
+              [
+                { text: "OK" }
+              ]
+            )
+
+          }
+
+          if (error.code === "auth/user-not-found") {
+            Alert.alert(
+              " Failed",
+              "There is no user record corresponding to this Email",
+              [
+                { text: "OK" }
+              ]
+            )
+          }
+        })//end of register catch
+        
     }
-   }
+  }
   const onSignup = () => {
     if (artistName !== "" && email !== "" && password !== "") {
       auth
@@ -117,25 +242,18 @@ export default function SignUpScreen({ navigation }) {
           artist.sendEmailVerification().then(()=>{
            console.log('email sent')
            //logout
-        //  auth.signOut()
+         //auth.signOut()
         .then(() => {
           // Toast.show("You have signed out!", Toast.LONG, Toast.CENTER);
 
          console.log('signed out')
-        
           
         })
-        .catch((error) => alert(error));
+        .catch((error) => alert(error)); 
    
 
            navigation.navigate("Onboarding");
-             Alert.alert(
-             "Verify Your Email",
-             "Please check your email for a varification link to activate your account",
-             [
-                 {text:"OK",  onPress: () =>{navigation.navigate('Onboarding')}}
-              ]
-            )
+            
 
           }).catch((error)=>{
            console.log(error.message)     
@@ -176,8 +294,16 @@ export default function SignUpScreen({ navigation }) {
        
 
          //save data
-
-
+         auth.signOut().then(()=>{
+          Alert.alert(
+            "Verify Your Email",
+            "Please check your email for a varification link to activate your account",
+            [
+                {text:"OK",  onPress: () =>{navigation.navigate('Onboarding')}}
+             ]
+           )
+         })
+ 
 
           console.log('User account created & signed in!');
         }) 
